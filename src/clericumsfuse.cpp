@@ -414,10 +414,107 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
     return 0;
 }
 
+int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flags) {
+    Q_UNUSED(flags);
+    if (!s_instance) {
+        return -ENOENT;
+    }
+
+    QString fromPathStr = QString::fromUtf8(from).mid(1);  // 移除前导 /
+    QString toPathStr = QString::fromUtf8(to).mid(1);     // 移除前导 /
+
+    // 不允许重命名挂载点标记文件
+    if (fromPathStr == MOUNT_MARKER_FILE || toPathStr == MOUNT_MARKER_FILE) {
+        return -EACCES;
+    }
+
+    // 检查源文件是否存在
+    QString realFromPath = s_instance->getFileList().value(fromPathStr);
+    if (realFromPath.isEmpty()) {
+        return -ENOENT;
+    }
+
+    // 不允许重命名为已存在的文件
+    QString realToPath = s_instance->getFileList().value(toPathStr);
+    if (!realToPath.isEmpty()) {
+        return -EEXIST;
+    }
+
+    // 判断是本源文件还是备份文件
+    if (s_instance->m_storeManager->isBackupFile(fromPathStr)) {
+        // 重命名备份文件
+        QString fromSourceName, toSourceName;
+        bool isBackupFrom, isBackupTo;
+
+        // 解析源文件名
+        if (!s_instance->m_storeManager->parseVirtualName(fromPathStr, fromSourceName, isBackupFrom)) {
+            return -ENOENT;
+        }
+
+        // 解析目标文件名
+        if (!s_instance->m_storeManager->parseVirtualName(toPathStr, toSourceName, isBackupTo)) {
+            // 目标可能是一个新的本源文件名
+            // 不允许将备份文件重命名为本源文件名
+            return -EACCES;
+        }
+
+        // 备份文件只能在同一本源文件内重命名
+        if (fromSourceName != toSourceName) {
+            return -EACCES;
+        }
+
+        // 获取备份信息
+        SourceInfo sourceInfo = s_instance->m_storeManager->getSource(fromSourceName);
+        if (sourceInfo.name.isEmpty()) {
+            return -ENOENT;
+        }
+
+        // 从虚拟名中提取备份名
+        // fromPathStr 格式为 "备份名 - 本源名"
+        QString fromBackupName = fromPathStr.left(fromPathStr.indexOf(" - "));
+        QString toBackupName = toPathStr.left(toPathStr.indexOf(" - "));
+
+        QString fromBackupPath = sourceInfo.backupsPath + "/" + fromBackupName;
+        QString toBackupPath = sourceInfo.backupsPath + "/" + toBackupName;
+
+        // 重命名备份文件
+        QFile backupFile(fromBackupPath);
+        if (!backupFile.rename(toBackupPath)) {
+            return -EIO;
+        }
+
+    } else {
+        // 重命名本源文件（整个本源目录）
+        // 获取本源信息
+        SourceInfo sourceInfo = s_instance->m_storeManager->getSource(fromPathStr);
+        if (sourceInfo.name.isEmpty()) {
+            return -ENOENT;
+        }
+
+        // 不允许重命名为备份文件名格式
+        QString dummySourceName;
+        bool dummyIsBackup;
+        if (s_instance->m_storeManager->parseVirtualName(toPathStr, dummySourceName, dummyIsBackup) && dummyIsBackup) {
+            return -EACCES;
+        }
+
+        // 重命名本源目录
+        QDir dir;
+        if (!dir.rename(sourceInfo.fullPath, sourceInfo.fullPath + "/../" + toPathStr)) {
+            return -EIO;
+        }
+    }
+
+    // 更新文件列表
+    s_instance->getFileList() = s_instance->m_storeManager->getFlatFileList();
+    return 0;
+}
+
 // FUSE 操作结构体（按 fuse_operations 定义顺序）
 static struct fuse_operations clericFuseOps = {
     .getattr = ClericumFuse::fuseGetattr,
     .unlink = ClericumFuse::fuseUnlink,
+    .rename = ClericumFuse::fuseRename,
     .open = ClericumFuse::fuseOpen,
     .read = ClericumFuse::fuseRead,
     .write = ClericumFuse::fuseWrite,

@@ -16,6 +16,7 @@ result
 *.so.*
 *_pch.h.cpp
 *_resource.rc
+.codebuddy
 *.qm
 .#*
 *.*#

@@ -192,6 +192,11 @@ public:
      */
     static int fuseUnlink(const char*);
 
+    /**
+     * @brief 重命名文件
+     */
+    static int fuseRename(const char* from, const char* to, unsigned int flags);
+
 signals:
     /**
      * @brief 挂载状态改变信号
