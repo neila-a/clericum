@@ -1,9 +1,14 @@
+cmake_minimum_required(VERSION 4.1.2)
+
 qt_standard_project_setup(REQUIRES 6.10)
 
 # Dont remove `_app` suffix!
 
 qt_add_executable(${GLOBAL_PROJECT_NAME}_app
     main.cpp
+    storemanager.cpp
+    clericumsfuse.cpp
+    commandhandler.cpp
 )
 
 qt_add_qml_module(${GLOBAL_PROJECT_NAME}_app
@@ -13,7 +18,9 @@ qt_add_qml_module(${GLOBAL_PROJECT_NAME}_app
 )
 
 target_link_libraries(${GLOBAL_PROJECT_NAME}_app
-    PRIVATE Qt6::Quick
+    PRIVATE
+        Qt6::Quick
+        fuse3
 )
 
 target_compile_definitions(${GLOBAL_PROJECT_NAME}_app PRIVATE
