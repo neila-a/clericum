@@ -194,6 +194,11 @@ public:
     static int fuseCreate(const char* path, mode_t mode,
         struct fuse_file_info* fi);
 
+    /**
+     * @brief 删除文件
+     */
+    static int fuseUnlink(const char *);
+
 signals:
     /**
      * @brief 挂载状态改变信号

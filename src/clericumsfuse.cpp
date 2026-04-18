@@ -134,6 +134,54 @@ int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
     return 0;
 }
 
+int ClericumFuse::fuseUnlink(const char* path) {
+    if (!s_instance) {
+        return -ENOENT;
+    }
+    s_instance->refreshCache();
+
+    QString pathStr = QString::fromUtf8(path);
+    pathStr = pathStr.mid(1);  // 移除前导 /
+
+    // 不允许删除挂载点标记文件
+    if (pathStr == MOUNT_MARKER_FILE) {
+        return -EACCES;
+    }
+
+    // 检查文件是否存在
+    QString realPath = s_instance->m_fileList.value(pathStr);
+    if (realPath.isEmpty()) {
+        return -ENOENT;
+    }
+
+    // 如果是备份文件，删除备份文件
+    if (s_instance->m_storeManager->isBackupFile(pathStr)) {
+        QFile file(realPath);
+        if (!file.remove()) {
+            return -EIO;
+        }
+        // 更新文件列表
+        s_instance->m_fileList = s_instance->m_storeManager->getFlatFileList();
+        return 0;
+    }
+
+    // 如果是本源文件，删除整个本源文件夹
+    QString sourceName = pathStr;
+    SourceInfo sourceInfo = s_instance->m_storeManager->getSource(sourceName);
+    if (sourceInfo.name.isEmpty()) {
+        return -ENOENT;
+    }
+
+    QDir sourceDir(sourceInfo.fullPath);
+    if (!sourceDir.removeRecursively()) {
+        return -EIO;
+    }
+
+    // 更新文件列表
+    s_instance->m_fileList = s_instance->m_storeManager->getFlatFileList();
+    return 0;
+}
+
 int ClericumFuse::fuseAccess(const char* path, int mask) {
     if (!s_instance) {
         return -ENOENT;
@@ -164,12 +212,6 @@ int ClericumFuse::fuseAccess(const char* path, int mask) {
     QFileInfo fileInfo(realPath);
     if (!fileInfo.exists()) {
         return -ENOENT;
-    }
-
-    // 检查写权限（备份文件的写入重定向到本源文件处理）
-    if (mask & W_OK) {
-        // 本源文件可写，备份文件的写权限也允许（会重定向到本源）
-        // 不再对备份文件返回 -EACCES
     }
 
     return 0;
@@ -388,6 +430,7 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
 // FUSE 操作结构体（按 fuse_operations 定义顺序）
 static struct fuse_operations clericFuseOps = {
     .getattr = ClericumFuse::fuseGetattr,
+    .unlink = ClericumFuse::fuseUnlink,
     .open = ClericumFuse::fuseOpen,
     .read = ClericumFuse::fuseRead,
     .write = ClericumFuse::fuseWrite,
