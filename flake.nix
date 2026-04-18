@@ -1,5 +1,5 @@
 rec {
-    description = "To be filled";
+    description = "A FUSE-based file backup and virtual filesystem tool.";
 
     inputs = {
         #nixpkgs.url = "github:NixOS/nixpkgs";
@@ -41,6 +41,7 @@ rec {
                         buildInputs = with pkgs; [
                             qt6.qtbase
                             qt6.qtdeclarative
+                            kdePackages.kcoreaddons
                             fuse3
                         ];
 
@@ -79,6 +80,13 @@ rec {
 
                         qt6.qtbase
                         qt6.qtdeclarative
+                        kdePackages.kcoreaddons
+                        kdePackages.kconfig
+                        kdePackages.kcrash
+                        kdePackages.kdbusaddons
+                        kdePackages.ki18n
+                        kdePackages.knotifications
+                        kdePackages.kwidgetsaddons
                         fuse3
                     ];
 

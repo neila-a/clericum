@@ -40,6 +40,8 @@
 #include <csignal>
 #include <unistd.h>
 
+#include <KAboutData>
+
 #include "commandhandler.h"
 
  // 全局命令处理器指针，用于信号处理
@@ -59,25 +61,30 @@ static void signalHandler(int signum) {
 int main(int argc, char* argv[]) {
     QCoreApplication app(argc, argv);
 
-    app.setApplicationName(_PROJECT_NAME);
-    app.setApplicationVersion(_PROJECT_VERSION);
-    app.setOrganizationName(_PROJECT_NAME);
+    KAboutData aboutData(
+        QStringLiteral(_PROJECT_NAME),
+        QStringLiteral(_PROJECT_NAME),
+        QStringLiteral(_PROJECT_VERSION),
+        QStringLiteral(_PROJECT_DESCRIPTION),
+        KAboutLicense::GPL_V3,
+        QStringLiteral("Copyright (C) 2026 Neila"),
+        QString(),
+        QStringLiteral(_PROJECT_HOMEPAGE),
+        QStringLiteral(_PROJECT_HOMEPAGE "/issues")
+    );
+    aboutData.addAuthor("Neila", "any", "neilaspace@outlook.com", "https://neilasite.pages.dev", "https://avatars.githubusercontent.com/u/78797625");
+    KAboutData::setApplicationData(aboutData);
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(
-        QStringLiteral("%1 - A FUSE-based file backup and virtual filesystem tool\n\n"
-            "Commands:\n"
-            "  store create <path>     Create a new store folder\n"
-            "  store load <store> <path>   Mount store to path\n"
-            "  store unload <path>    Unmount filesystem\n"
-            "  backup create <path> <name>  Create backup of file\n"
-            "  backup load <path> <name>   Load a backup file\n"
-            "  gui                   Launch GUI (not implemented)")
-        .arg(_PROJECT_NAME)
-    );
-
-    parser.addHelpOption();
-    parser.addVersionOption();
+    aboutData.setupCommandLine(&parser);
+    parser.setApplicationDescription(aboutData.shortDescription() + "\n"
+        "Commands:\n"
+        "  store create <path>     Create a new store folder\n"
+        "  store load <store> <path>   Mount store to path\n"
+        "  store unload <path>    Unmount filesystem\n"
+        "  backup create <path> <name>  Create backup of file\n"
+        "  backup load <path> <name>   Load a backup file\n"
+        "  gui                   Launch GUI (not implemented)");
 
     parser.addPositionalArgument("action", "The action to perform: store, backup, or gui");
     parser.addPositionalArgument("subaction", "Sub action: create, load, unload (for store); create, load (for backup)");
