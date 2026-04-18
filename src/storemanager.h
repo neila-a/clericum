@@ -256,12 +256,12 @@ public:
      */
     QStringList getSourceNames() const;
 
-private:
     /**
      * @brief 刷新内部缓存
      */
     void refreshCache() const;
 
+private:
     QString m_storePath;                    ///< store 文件夹路径
     mutable QMap<QString, SourceInfo> m_cache;  ///< 本源文件信息缓存
     mutable bool m_cacheValid = false;      ///< 缓存是否有效

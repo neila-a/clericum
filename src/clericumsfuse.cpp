@@ -56,6 +56,7 @@ ClericumFuse::MountStatus ClericumFuse::status() const {
 }
 
 void ClericumFuse::refreshCache() {
+    m_storeManager->refreshCache();
     m_fileList = m_storeManager->getFlatFileList();
 }
 
@@ -84,6 +85,7 @@ int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
     if (!s_instance) {
         return -ENOENT;
     }
+    s_instance->refreshCache();
 
     memset(stbuf, 0, sizeof(struct stat));
 
@@ -136,6 +138,7 @@ int ClericumFuse::fuseAccess(const char* path, int mask) {
     if (!s_instance) {
         return -ENOENT;
     }
+    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
 
@@ -184,6 +187,7 @@ int ClericumFuse::fuseReaddir(const char* path, void* buf,
     if (!s_instance) {
         return -ENOENT;
     }
+    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
 
@@ -231,11 +235,6 @@ int ClericumFuse::fuseOpen(const char* path, struct fuse_file_info* fi) {
         return -ENOENT;
     }
 
-    // 备份文件允许写操作（写入会重定向到本源文件）
-    if (s_instance->m_storeManager->isBackupFile(pathStr)) {
-        // 允许任何模式打开，写操作会重定向到本源文件
-    }
-
     return 0;
 }
 
@@ -246,6 +245,7 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
     if (!s_instance) {
         return -ENOENT;
     }
+    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
@@ -292,6 +292,7 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
     if (!s_instance) {
         return -ENOENT;
     }
+    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
@@ -325,6 +326,7 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
     if (realPath.isEmpty()) {
         return -ENOENT;
     }
+    s_instance->refreshCache();
 
     QFile file(realPath);
     if (!file.open(QIODevice::WriteOnly)) {
@@ -349,6 +351,7 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
     if (!s_instance) {
         return -ENOENT;
     }
+    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
