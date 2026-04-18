@@ -327,39 +327,26 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
 
+    QString realPath;
     // 备份文件的写入重定向到本源文件
     if (s_instance->m_storeManager->isBackupFile(pathStr)) {
         // 使用 resolveRealPath 获取本源文件的 current 路径进行写入
-        QString realPath = s_instance->m_storeManager->resolveRealPath(pathStr);
-        if (realPath.isEmpty()) {
-            return -ENOENT;
-        }
+        realPath = s_instance->m_storeManager->resolveRealPath(pathStr);
 
-        QFile file(realPath);
-        if (!file.open(QIODevice::WriteOnly)) {
+        // 用备份文件覆盖本源文件，以符合offset
+        /*if (!QFile::copy(pathStr, realPath)) {
             return -EIO;
-        }
-
-        if (!file.seek(offset)) {
-            file.close();
-            return -EIO;
-        }
-
-        qint64 bytesWritten = file.write(buf, size);
-        file.close();
-
-        return static_cast<int>(bytesWritten);
+        }*/
+    } else {
+        realPath = s_instance->getFileList().value(pathStr);
     }
-
-    QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
     }
-    // 无需每次都刷新缓存，因为已在上方刷新
 
     QFile file(realPath);
-    if (!file.open(QIODevice::WriteOnly)) {
+    if (!file.open(QIODevice::ReadWrite)) {
         return -EIO;
     }
 
