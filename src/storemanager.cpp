@@ -174,6 +174,38 @@ bool StoreManager::createBackup(const QString& sourceName, const QString& backup
     return true;
 }
 
+bool StoreManager::loadBackup(const QString& sourceName, const QString& backupName) {
+    SourceInfo sourceInfo = getSource(sourceName);
+    if (sourceInfo.currentPath.isEmpty()) {
+        qWarning() << "Source not found:" << sourceName;
+        return false;
+    }
+
+    // 查找指定的备份
+    QString backupPath;
+    for (const BackupInfo& backup : sourceInfo.backups) {
+        if (backup.name == backupName) {
+            backupPath = backup.fullPath;
+            break;
+        }
+    }
+
+    if (backupPath.isEmpty()) {
+        qWarning() << "Backup not found:" << backupName;
+        return false;
+    }
+
+    // 复制备份文件到 current
+    QFile::remove(sourceInfo.currentPath); // 必须显式覆盖
+    if (!QFile::copy(backupPath, sourceInfo.currentPath)) {
+        qWarning() << "Failed to load backup " << backupPath << " to current " << sourceInfo.currentPath;
+        return false;
+    }
+
+    m_cacheValid = false;
+    return true;
+}
+
 bool StoreManager::copyToCurrent(const QString& sourceName, const QString& sourceFile) {
     SourceInfo sourceInfo = getSource(sourceName);
     if (sourceInfo.currentPath.isEmpty()) {
@@ -190,7 +222,7 @@ bool StoreManager::copyToCurrent(const QString& sourceName, const QString& sourc
 
     // 复制文件到 current
     if (!QFile::copy(sourceFile, sourceInfo.currentPath)) {
-        qWarning() << "Failed to copy to current:" << sourceFile;
+        qWarning() << "Failed to copy " << sourceFile << " to " << sourceInfo.currentPath;
         return false;
     }
 
@@ -223,8 +255,8 @@ QMap<QString, QString> StoreManager::getFlatFileList() const {
 
         // 添加备份文件（命名为 "备份名-本源名"）
         for (const BackupInfo& backup : sourceInfo.backups) {
-            QString virtualName = backup.name + "-" + sourceInfo.name;
-            result.insert(virtualName, sourceInfo.currentPath);
+            QString virtualName = backup.name + " - " + sourceInfo.name;
+            result.insert(virtualName, sourceInfo.backupsPath + "/" + backup.name);
         }
     }
 
@@ -245,11 +277,11 @@ bool StoreManager::parseVirtualName(const QString& virtualName,
     QString longestMatch;
 
     for (const QString& sourceName : sourceNames) {
-        QString prefix = "-" + sourceName;
+        QString prefix = " - " + sourceName;
         if (virtualName.endsWith(prefix)) {
             // 检查这个前缀是否是有效的（即前面的部分是备份名）
             QString backupName = virtualName.left(virtualName.length() - prefix.length());
-            if (!backupName.isEmpty() && !backupName.contains("-")) {
+            if (!backupName.isEmpty() && !backupName.contains(" - ")) {
                 // 找到一个匹配
                 if (prefix.length() > longestMatch.length()) {
                     longestMatch = prefix;

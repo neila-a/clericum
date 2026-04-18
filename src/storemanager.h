@@ -184,6 +184,16 @@ public:
     bool createBackup(const QString& sourceName, const QString& backupName);
 
     /**
+     * @brief 从备份加载到 current
+     * @param sourceName 本源文件名
+     * @param backupName 备份名
+     * @return 是否加载成功
+     *
+     * 将指定备份的内容复制到本源文件的 current 位置。
+     */
+    bool loadBackup(const QString& sourceName, const QString& backupName);
+
+    /**
      * @brief 复制文件到 current
      * @param sourceName 本源文件名
      * @param sourceFile 要复制的源文件路径

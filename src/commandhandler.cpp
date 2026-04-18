@@ -142,6 +142,59 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     return Result::ok(msg);
 }
 
+CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualPath,
+    const QString& backupName) {
+    // 提取文件名
+    QString fileName = extractFileName(virtualPath);
+
+    // 查找挂载点
+    MountInfo mountInfo = findMountPoint(virtualPath);
+    if (mountInfo.mountPath.isEmpty()) {
+        return Result::fail("Path not in mounted filesystem", virtualPath);
+    }
+
+    // 检查备份名是否有效
+    if (backupName.isEmpty() || backupName.contains('/') ||
+        backupName.contains('-') || backupName.startsWith('.')) {
+        return Result::fail("Invalid backup name", backupName);
+    }
+
+    // 解析本源文件名
+    QString sourceName = extractSourceName(fileName);
+
+    // 检查本源文件是否存在
+    StoreManager storeManager;
+    storeManager.setStorePath(mountInfo.storePath);
+    if (!storeManager.sourceExists(sourceName)) {
+        return Result::fail("Source file not found", sourceName);
+    }
+
+    // 检查备份是否存在
+    auto sourceInfo = storeManager.getSource(sourceName);
+    bool backupExists = false;
+    for (const BackupInfo& backup : sourceInfo.backups) {
+        if (backup.name == backupName) {
+            backupExists = true;
+            break;
+        }
+    }
+
+    if (!backupExists) {
+        return Result::fail("Backup not found", backupName);
+    }
+
+    // 从备份加载到 current
+    if (!storeManager.loadBackup(sourceName, backupName)) {
+        return Result::fail("Failed to load backup");
+    }
+
+    QString msg = QString("Backup '%1' loaded to '%2'")
+        .arg(backupName, sourceName);
+    emit commandFinished(true, msg);
+
+    return Result::ok(msg);
+}
+
 bool CommandHandler::isPathMounted(const QString& path) const {
     const MountInfo info = findMountPoint(path);
     return !info.mountPath.isEmpty();

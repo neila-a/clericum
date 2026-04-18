@@ -3,7 +3,7 @@
  * @brief CommandHandler 类声明
  *
  * CommandHandler 负责处理 clericum 的命令行命令，
- * 包括 create、load、unload 和 backup 命令。
+ * 包括 store create/load/unload 和 backup create/load 命令。
  *
  * @sa ClericumFuse
  * @sa StoreManager
@@ -17,35 +17,41 @@
 #include <QString>
 #include <QMap>
 
- /**
-  * @class CommandHandler
-  * @brief 命令处理器类
-  *
-  * CommandHandler 管理所有 clericum 命令的执行：
-  * - create: 创建新的 store 文件夹
-  * - load: 挂载 FUSE 文件系统
-  * - unload: 卸载 FUSE 文件系统
-  * - backup: 创建文件备份
-  *
-  * ### 命令使用示例 ###
-  *
-  * #### create 命令 ####
-  * @code
-  * CommandHandler handler;
-  * handler.executeCreate("/path/to/store");
-  * @endcode
-  *
-  * #### load 命令 ####
-  * @code
-  * CommandHandler handler;
-  * handler.executeLoad("/path/to/store", "/path/to/mount");
-  * @endcode
-  *
-  * #### backup 命令 ####
-  * @code
-  * handler.executeBackup("/path/to/mount/file", "backup-name");
-  * @endcode
-  */
+/**
+ * @class CommandHandler
+ * @brief 命令处理器类
+ *
+ * CommandHandler 管理所有 clericum 命令的执行：
+ * - store create: 创建新的 store 文件夹
+ * - store load: 挂载 FUSE 文件系统
+ * - store unload: 卸载 FUSE 文件系统
+ * - backup create: 创建文件备份
+ * - backup load: 从备份加载到本源文件
+ *
+ * ### 命令使用示例 ###
+ *
+ * #### store create 命令 ####
+ * @code
+ * CommandHandler handler;
+ * handler.executeCreate("/path/to/store");
+ * @endcode
+ *
+ * #### store load 命令 ####
+ * @code
+ * CommandHandler handler;
+ * handler.executeLoad("/path/to/store", "/path/to/mount");
+ * @endcode
+ *
+ * #### backup create 命令 ####
+ * @code
+ * handler.executeBackup("/path/to/mount/file", "backup-name");
+ * @endcode
+ *
+ * #### backup load 命令 ####
+ * @code
+ * handler.executeBackupLoad("/path/to/mount/file", "backup-name");
+ * @endcode
+ */
 class CommandHandler : public QObject {
     Q_OBJECT
 
@@ -124,7 +130,7 @@ public:
     Q_INVOKABLE Result executeUnload(const QString& mountPath);
 
     /**
-     * @brief 执行 backup 命令
+     * @brief 执行 backup create 命令
      * @param virtualPath 虚拟文件路径（在 FUSE 文件系统中）
      * @param backupName 备份名称
      * @return 执行结果
@@ -135,6 +141,19 @@ public:
      * - /mount/path/backupname-filename - 备份文件
      */
     Q_INVOKABLE Result executeBackup(const QString& virtualPath, const QString& backupName);
+
+    /**
+     * @brief 执行 backup load 命令
+     * @param virtualPath 虚拟文件路径（在 FUSE 文件系统中）
+     * @param backupName 备份名称
+     * @return 执行结果
+     *
+     * 从备份加载文件内容到本源文件。
+     * 虚拟路径格式：
+     * - /mount/path/filename - 本源文件
+     * - /mount/path/backupname-filename - 备份文件
+     */
+    Q_INVOKABLE Result executeBackupLoad(const QString& virtualPath, const QString& backupName);
 
     /**
      * @brief 检查路径是否在已挂载的文件系统中
