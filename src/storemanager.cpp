@@ -245,9 +245,7 @@ QMap<QString, QString> StoreManager::getFlatFileList() const {
         refreshCache();
     }
 
-    for (auto it = m_cache.constBegin(); it != m_cache.constEnd(); ++it) {
-        const SourceInfo& sourceInfo = it.value();
-
+    for (const SourceInfo& sourceInfo : m_cache.values()) {
         // 添加本源文件（current）
         if (QFileInfo::exists(sourceInfo.currentPath)) {
             result.insert(sourceInfo.name, sourceInfo.currentPath);

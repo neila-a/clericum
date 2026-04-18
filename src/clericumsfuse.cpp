@@ -246,9 +246,8 @@ int ClericumFuse::fuseReaddir(const char* path, void* buf,
     filler(buf, MOUNT_MARKER_FILE, nullptr, 0, static_cast<fuse_fill_dir_flags>(0));
 
     // 添加所有虚拟文件
-    for (auto it = s_instance->m_fileList.constBegin();
-        it != s_instance->m_fileList.constEnd(); ++it) {
-        filler(buf, qPrintable(it.key()), nullptr, 0,
+    for (const QString& virtualPath : s_instance->m_fileList.keys()) {
+        filler(buf, qPrintable(virtualPath), nullptr, 0,
             static_cast<fuse_fill_dir_flags>(0));
     }
 
