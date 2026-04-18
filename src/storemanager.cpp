@@ -17,7 +17,6 @@ StoreManager::~StoreManager() = default;
 
 void StoreManager::setStorePath(const QString& path) {
     m_storePath = path;
-    m_cacheValid = false;
 }
 
 QString StoreManager::storePath() const {
@@ -66,12 +65,11 @@ bool StoreManager::isValidStore() const {
     return isValidStore(m_storePath);
 }
 
-void StoreManager::refreshCache() const {
-    m_cache.clear();
+QMap<QString, SourceInfo> StoreManager::scanSources() const {
+    QMap<QString, SourceInfo> result;
 
     if (!isValidStore()) {
-        m_cacheValid = false;
-        return;
+        return result;
     }
 
     QDir storeDir(m_storePath);
@@ -101,26 +99,18 @@ void StoreManager::refreshCache() const {
             }
         }
 
-        m_cache.insert(entry, sourceInfo);
+        result.insert(entry, sourceInfo);
     }
 
-    m_cacheValid = true;
+    return result;
 }
 
 QVector<SourceInfo> StoreManager::getAllSources() const {
-    if (!m_cacheValid) {
-        refreshCache();
-    }
-
-    return QVector<SourceInfo>::fromList(m_cache.values());
+    return QVector<SourceInfo>::fromList(scanSources().values());
 }
 
 SourceInfo StoreManager::getSource(const QString& name) const {
-    if (!m_cacheValid) {
-        refreshCache();
-    }
-
-    return m_cache.value(name);
+    return scanSources().value(name);
 }
 
 QString StoreManager::getCurrentPath(const QString& name) const {
@@ -151,7 +141,6 @@ bool StoreManager::createSource(const QString& name) {
         return false;
     }
 
-    m_cacheValid = false;
     return true;
 }
 
@@ -170,7 +159,6 @@ bool StoreManager::createBackup(const QString& sourceName, const QString& backup
         return false;
     }
 
-    m_cacheValid = false;
     return true;
 }
 
@@ -202,7 +190,6 @@ bool StoreManager::loadBackup(const QString& sourceName, const QString& backupNa
         return false;
     }
 
-    m_cacheValid = false;
     return true;
 }
 
@@ -226,26 +213,17 @@ bool StoreManager::copyToCurrent(const QString& sourceName, const QString& sourc
         return false;
     }
 
-    m_cacheValid = false;
     return true;
 }
 
 bool StoreManager::sourceExists(const QString& name) const {
-    if (!m_cacheValid) {
-        refreshCache();
-    }
-
-    return m_cache.contains(name);
+    return scanSources().contains(name);
 }
 
 QMap<QString, QString> StoreManager::getFlatFileList() const {
     QMap<QString, QString> result;
 
-    if (!m_cacheValid) {
-        refreshCache();
-    }
-
-    for (const SourceInfo& sourceInfo : m_cache.values()) {
+    for (const SourceInfo& sourceInfo : scanSources().values()) {
         // 添加本源文件（current）
         if (QFileInfo::exists(sourceInfo.currentPath)) {
             result.insert(sourceInfo.name, sourceInfo.currentPath);
@@ -267,11 +245,7 @@ bool StoreManager::parseVirtualName(const QString& virtualName,
     // 检查是否是备份文件（格式：备份名-本源名）
     // 需要找到最后一个 '-' 后的本源名
 
-    if (!m_cacheValid) {
-        refreshCache();
-    }
-
-    const QStringList sourceNames = m_cache.keys();
+    const QStringList sourceNames = scanSources().keys();
     QString longestMatch;
 
     for (const QString& sourceName : sourceNames) {
@@ -328,9 +302,5 @@ bool StoreManager::isBackupFile(const QString& virtualName) const {
 }
 
 QStringList StoreManager::getSourceNames() const {
-    if (!m_cacheValid) {
-        refreshCache();
-    }
-
-    return m_cache.keys();
+    return scanSources().keys();
 }

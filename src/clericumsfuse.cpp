@@ -55,17 +55,12 @@ ClericumFuse::MountStatus ClericumFuse::status() const {
     return m_status;
 }
 
-void ClericumFuse::refreshCache() {
-    m_storeManager->refreshCache();
-    m_fileList = m_storeManager->getFlatFileList();
-}
-
 QStringList ClericumFuse::fileNames() const {
-    return m_fileList.keys();
+    return getFileList().keys();
 }
 
 QString ClericumFuse::resolvePath(const QString& name) const {
-    return m_fileList.value(name, QString());
+    return getFileList().value(name, QString());
 }
 
 bool ClericumFuse::isBackupFile(const QString& name) const {
@@ -85,7 +80,6 @@ int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
     if (!s_instance) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
 
     memset(stbuf, 0, sizeof(struct stat));
 
@@ -113,7 +107,7 @@ int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
         return 0;
     }
 
-    QString realPath = s_instance->m_fileList.value(pathStr);
+    QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
@@ -138,7 +132,6 @@ int ClericumFuse::fuseUnlink(const char* path) {
     if (!s_instance) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
@@ -149,7 +142,7 @@ int ClericumFuse::fuseUnlink(const char* path) {
     }
 
     // 检查文件是否存在
-    QString realPath = s_instance->m_fileList.value(pathStr);
+    QString realPath = s_instance->getFileList().value(pathStr);
     if (realPath.isEmpty()) {
         return -ENOENT;
     }
@@ -161,7 +154,7 @@ int ClericumFuse::fuseUnlink(const char* path) {
             return -EIO;
         }
         // 更新文件列表
-        s_instance->m_fileList = s_instance->m_storeManager->getFlatFileList();
+        s_instance->getFileList() = s_instance->m_storeManager->getFlatFileList();
         return 0;
     }
 
@@ -178,7 +171,7 @@ int ClericumFuse::fuseUnlink(const char* path) {
     }
 
     // 更新文件列表
-    s_instance->m_fileList = s_instance->m_storeManager->getFlatFileList();
+    s_instance->getFileList() = s_instance->m_storeManager->getFlatFileList();
     return 0;
 }
 
@@ -186,7 +179,6 @@ int ClericumFuse::fuseAccess(const char* path, int mask) {
     if (!s_instance) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
 
@@ -203,7 +195,7 @@ int ClericumFuse::fuseAccess(const char* path, int mask) {
         return 0;  // 标记文件只读
     }
 
-    QString realPath = s_instance->m_fileList.value(pathStr);
+    QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
@@ -229,7 +221,6 @@ int ClericumFuse::fuseReaddir(const char* path, void* buf,
     if (!s_instance) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
 
@@ -246,7 +237,7 @@ int ClericumFuse::fuseReaddir(const char* path, void* buf,
     filler(buf, MOUNT_MARKER_FILE, nullptr, 0, static_cast<fuse_fill_dir_flags>(0));
 
     // 添加所有虚拟文件
-    for (const QString& virtualPath : s_instance->m_fileList.keys()) {
+    for (const QString& virtualPath : s_instance->getFileList().keys()) {
         filler(buf, qPrintable(virtualPath), nullptr, 0,
             static_cast<fuse_fill_dir_flags>(0));
     }
@@ -270,7 +261,7 @@ int ClericumFuse::fuseOpen(const char* path, struct fuse_file_info* fi) {
         return 0;
     }
 
-    QString realPath = s_instance->m_fileList.value(pathStr);
+    QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
@@ -286,7 +277,6 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
     if (!s_instance) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
@@ -305,7 +295,7 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
         return 0;
     }
 
-    QString realPath = s_instance->m_fileList.value(pathStr);
+    QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
@@ -333,7 +323,6 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
     if (!s_instance) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
@@ -362,12 +351,12 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
         return static_cast<int>(bytesWritten);
     }
 
-    QString realPath = s_instance->m_fileList.value(pathStr);
+    QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
+    // 无需每次都刷新缓存，因为已在上方刷新
 
     QFile file(realPath);
     if (!file.open(QIODevice::WriteOnly)) {
@@ -392,7 +381,6 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
     if (!s_instance) {
         return -ENOENT;
     }
-    s_instance->refreshCache();
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
@@ -420,7 +408,7 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
     file.close();
 
     // 更新文件列表
-    s_instance->m_fileList = s_instance->m_storeManager->getFlatFileList();
+    s_instance->getFileList() = s_instance->m_storeManager->getFlatFileList();
 
     fi->flags |= O_WRONLY;
     return 0;
@@ -472,7 +460,7 @@ bool ClericumFuse::mount() {
     QCoreApplication::processEvents();
 
     // 刷新文件列表
-    m_fileList = m_storeManager->getFlatFileList();
+    getFileList() = m_storeManager->getFlatFileList();
 
     // FUSE 参数 - 不使用调试模式 (-d)，fuse_main 会自动后台运行
     QByteArray mountPointBytes = m_mountPath.toUtf8();

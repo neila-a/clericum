@@ -118,13 +118,6 @@ public:
     bool mount();
 
     /**
-     * @brief 刷新文件系统缓存
-     *
-     * 重新扫描 store 文件夹，更新虚拟文件列表。
-     */
-    void refreshCache();
-
-    /**
      * @brief 获取文件名列表
      * @return 虚拟文件名列表
      */
@@ -197,7 +190,7 @@ public:
     /**
      * @brief 删除文件
      */
-    static int fuseUnlink(const char *);
+    static int fuseUnlink(const char*);
 
 signals:
     /**
@@ -225,8 +218,11 @@ signals:
 private:
     static ClericumFuse* s_instance;  ///< 静态实例指针，用于 FUSE 回调
 
+    inline QMap<QString, QString> getFileList() const { ///< 虚拟文件名到真实路径的映射
+        return m_storeManager->getFlatFileList();
+    };
+
     QSharedPointer<StoreManager> m_storeManager;  ///< Store 管理器
     QString m_mountPath;                          ///< 挂载点路径
     MountStatus m_status = MountStatus::NotMounted;  ///< 挂载状态
-    QMap<QString, QString> m_fileList;            ///< 虚拟文件名到真实路径的映射
 };
