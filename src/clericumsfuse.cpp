@@ -158,15 +158,16 @@ int ClericumFuse::fuseUnlink(const char* path) {
         return 0;
     }
 
-    // 如果是本源文件，删除整个本源文件夹
+    // 如果是本源文件，删除本源文件
     QString sourceName = pathStr;
     SourceInfo sourceInfo = s_instance->m_storeManager->getSource(sourceName);
     if (sourceInfo.name.isEmpty()) {
         return -ENOENT;
     }
 
-    QDir sourceDir(sourceInfo.fullPath);
-    if (!sourceDir.removeRecursively()) {
+    // 删除本源文件
+    QFile sourceFile(sourceInfo.currentPath);
+    if (!sourceFile.remove()) {
         return -EIO;
     }
 
@@ -334,9 +335,12 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
         realPath = s_instance->m_storeManager->resolveRealPath(pathStr);
 
         // 用备份文件覆盖本源文件，以符合offset
-        /*if (!QFile::copy(pathStr, realPath)) {
+        if (!QFile::remove(realPath)) {
             return -EIO;
-        }*/
+        }
+        if (!QFile::copy(s_instance->getFileList().value(pathStr), realPath)) {
+            return -EIO;
+        }
     } else {
         realPath = s_instance->getFileList().value(pathStr);
     }
@@ -382,6 +386,12 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
 
     // 确保本源文件条目存在
     if (!s_instance->m_storeManager->sourceExists(sourceName)) {
+        // 确保 files 目录存在
+        QDir dir;
+        QString filesDir = s_instance->m_storeManager->storePath() + "/" + StoreManager::FILES_DIRNAME;
+        if (!dir.exists(filesDir)) {
+            dir.mkpath(filesDir);
+        }
         s_instance->m_storeManager->createSource(sourceName);
     }
 
@@ -444,12 +454,7 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
             // 不允许将备份文件重命名为本源文件名
             return -EACCES;
         }
-
-        // 备份文件只能在同一本源文件内重命名
-        if (fromSourceName != toSourceName) {
-            return -EACCES;
-        }
-
+        
         // 获取备份信息
         SourceInfo sourceInfo = s_instance->m_storeManager->getSource(fromSourceName);
         if (sourceInfo.name.isEmpty()) {
@@ -471,7 +476,7 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
         }
 
     } else {
-        // 重命名本源文件（整个本源目录）
+        // 重命名本源文件
         // 获取本源信息
         SourceInfo sourceInfo = s_instance->m_storeManager->getSource(fromPathStr);
         if (sourceInfo.name.isEmpty()) {
@@ -485,9 +490,11 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
             return -EACCES;
         }
 
-        // 重命名本源目录
-        QDir dir;
-        if (!dir.rename(sourceInfo.fullPath, sourceInfo.fullPath + "/../" + toPathStr)) {
+        // 重命名本源文件（files/下的文件）
+        QFile sourceFile(sourceInfo.currentPath);
+        QString newCurrentPath = s_instance->m_storeManager->storePath() + "/" +
+            StoreManager::FILES_DIRNAME + "/" + toPathStr;
+        if (!sourceFile.rename(newCurrentPath)) {
             return -EIO;
         }
     }

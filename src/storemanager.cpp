@@ -46,6 +46,16 @@ bool StoreManager::create(const QString& path) {
     }
     markerFile.close();
 
+    // 创建 files 和 backups 子目录
+    if (!dir.mkpath(path + "/" + FILES_DIRNAME)) {
+        qWarning() << "Failed to create files directory";
+        return false;
+    }
+    if (!dir.mkpath(path + "/" + BACKUPS_DIRNAME)) {
+        qWarning() << "Failed to create backups directory";
+        return false;
+    }
+
     // 设置路径并验证
     m_storePath = path;
     return isValidStore();
@@ -58,7 +68,15 @@ bool StoreManager::isValidStore(const QString& path) const {
     }
 
     QFileInfo metaFile(path + "/" + METADATA_FILENAME);
-    return metaFile.exists() && metaFile.isFile();
+    if (!metaFile.exists() || !metaFile.isFile()) {
+        return false;
+    }
+
+    // 检查 files 和 backups 子目录是否存在
+    QFileInfo filesDir(path + "/" + FILES_DIRNAME);
+    QFileInfo backupsDir(path + "/" + BACKUPS_DIRNAME);
+    return filesDir.exists() && filesDir.isDir() &&
+           backupsDir.exists() && backupsDir.isDir();
 }
 
 bool StoreManager::isValidStore() const {
@@ -72,8 +90,12 @@ QMap<QString, SourceInfo> StoreManager::scanSources() const {
         return result;
     }
 
-    QDir storeDir(m_storePath);
-    const auto entries = storeDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    QDir filesDir(m_storePath + "/" + FILES_DIRNAME);
+    if (!filesDir.exists()) {
+        return result;
+    }
+
+    const auto entries = filesDir.entryList(QDir::Files);
 
     for (const QString& entry : entries) {
         // 跳过元数据文件
@@ -83,9 +105,8 @@ QMap<QString, SourceInfo> StoreManager::scanSources() const {
 
         SourceInfo sourceInfo;
         sourceInfo.name = entry;
-        sourceInfo.fullPath = m_storePath + "/" + entry;
-        sourceInfo.currentPath = sourceInfo.fullPath + "/" + CURRENT_FILENAME;
-        sourceInfo.backupsPath = sourceInfo.fullPath + "/" + BACKUPS_DIRNAME;
+        sourceInfo.currentPath = m_storePath + "/" + FILES_DIRNAME + "/" + entry;
+        sourceInfo.backupsPath = m_storePath + "/" + BACKUPS_DIRNAME + "/" + entry;
 
         // 扫描备份文件
         QDir backupsDir(sourceInfo.backupsPath);
@@ -119,25 +140,30 @@ QString StoreManager::getCurrentPath(const QString& name) const {
 }
 
 bool StoreManager::createSource(const QString& name) {
-    QString sourcePath = m_storePath + "/" + name;
+    QString filesDirPath = m_storePath + "/" + FILES_DIRNAME;
+    QString filePath = filesDirPath + "/" + name;
+    QString backupsDirPath = m_storePath + "/" + BACKUPS_DIRNAME + "/" + name;
 
+    // 确保 files 目录存在
     QDir dir;
-    if (!dir.mkpath(sourcePath)) {
-        qWarning() << "Failed to create source directory:" << sourcePath;
-        return false;
+    if (!dir.exists(filesDirPath)) {
+        if (!dir.mkpath(filesDirPath)) {
+            qWarning() << "Failed to create files directory:" << filesDirPath;
+            return false;
+        }
     }
 
-    // 创建 current 文件（空文件）
-    QFile currentFile(sourcePath + "/" + CURRENT_FILENAME);
+    // 创建本源文件（空文件）
+    QFile currentFile(filePath);
     if (!currentFile.open(QIODevice::WriteOnly)) {
-        qWarning() << "Failed to create current file";
+        qWarning() << "Failed to create source file:" << filePath;
         return false;
     }
     currentFile.close();
 
-    // 创建 backups 文件夹
-    if (!dir.mkpath(sourcePath + "/" + BACKUPS_DIRNAME)) {
-        qWarning() << "Failed to create backups directory";
+    // 创建 backups/本源名 子目录
+    if (!dir.mkpath(backupsDirPath)) {
+        qWarning() << "Failed to create backups directory:" << backupsDirPath;
         return false;
     }
 
@@ -150,6 +176,8 @@ bool StoreManager::createBackup(const QString& sourceName, const QString& backup
         qWarning() << "Source not found:" << sourceName;
         return false;
     }
+    QDir dir;
+    dir.mkpath(sourceInfo.backupsPath);
 
     QString backupPath = sourceInfo.backupsPath + "/" + backupName;
 
@@ -201,13 +229,13 @@ bool StoreManager::copyToCurrent(const QString& sourceName, const QString& sourc
     }
 
     // 如果本源文件条目不存在，先创建
-    if (!QFileInfo::exists(sourceInfo.fullPath)) {
+    if (!QFileInfo::exists(sourceInfo.currentPath)) {
         if (!createSource(sourceName)) {
             return false;
         }
     }
 
-    // 复制文件到 current
+    // 复制文件到本源文件
     if (!QFile::copy(sourceFile, sourceInfo.currentPath)) {
         qWarning() << "Failed to copy " << sourceFile << " to " << sourceInfo.currentPath;
         return false;
@@ -224,15 +252,15 @@ QMap<QString, QString> StoreManager::getFlatFileList() const {
     QMap<QString, QString> result;
 
     for (const SourceInfo& sourceInfo : scanSources().values()) {
-        // 添加本源文件（current）
+        // 添加本源文件
         if (QFileInfo::exists(sourceInfo.currentPath)) {
             result.insert(sourceInfo.name, sourceInfo.currentPath);
         }
 
-        // 添加备份文件（命名为 "备份名-本源名"）
+        // 添加备份文件（命名为 "备份名 - 本源名"）
         for (const BackupInfo& backup : sourceInfo.backups) {
             QString virtualName = backup.name + " - " + sourceInfo.name;
-            result.insert(virtualName, sourceInfo.backupsPath + "/" + backup.name);
+            result.insert(virtualName, backup.fullPath);
         }
     }
 

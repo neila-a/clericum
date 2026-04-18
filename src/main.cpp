@@ -22,10 +22,14 @@
  * @code
  * store/
  * ├── .clericum-store   # 标记
- * ├── filename/
- * │   ├── current        # 本源文件
- * │   └── backups/
- * │       └── backup1
+ * ├── files/
+ * │   ├── filename1     # 本源文件
+ * │   └── filename2
+ * └── backups/
+ *     ├── filename1/
+ *     │   └── backup1
+ *     └── filename2/
+ *         └── backup3
  * @endcode
  *
  * @author Clericum Team

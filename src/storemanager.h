@@ -33,9 +33,8 @@ struct BackupInfo {
  */
 struct SourceInfo {
     QString name;           ///< 本源文件名
-    QString fullPath;       ///< 本源文件夹完整路径
-    QString currentPath;    ///< current 文件路径
-    QString backupsPath;    ///< backups 文件夹路径
+    QString currentPath;    ///< 本源文件路径（files/下的文件）
+    QString backupsPath;    ///< backups/本源名 文件夹路径
     QVector<BackupInfo> backups;  ///< 备份列表
 };
 
@@ -52,14 +51,15 @@ struct SourceInfo {
  * @code
  * store/
  * ├── .clericum-store   # 标记文件
- * ├── filename1/
- * │   ├── current        # 本源文件内容
- * │   └── backups/
- * │       ├── backup1
- * │       └── backup2
- * └── filename2/
- *     ├── current
- *     └── backups/
+ * ├── files/
+ * │   ├── filename1     # 本源文件内容
+ * │   └── filename2
+ * └── backups/
+ *     ├── filename1/
+ *     │   ├── backup1
+ *     │   └── backup2
+ *     └── filename2/
+ *         └── backup3
  * @endcode
  *
  * ### 使用示例 ###
@@ -79,8 +79,8 @@ class StoreManager : public QObject {
 public:
     /** @brief 标记文件名 */
     static constexpr const char* METADATA_FILENAME = ".clericum-store";
-    /** @brief 本源文件内容文件名 */
-    static constexpr const char* CURRENT_FILENAME = "current";
+    /** @brief 本源文件目录名 */
+    static constexpr const char* FILES_DIRNAME = "files";
     /** @brief 备份文件夹名 */
     static constexpr const char* BACKUPS_DIRNAME = "backups";
 
@@ -167,9 +167,8 @@ public:
      * @return 是否创建成功
      *
      * 在 store 中创建一个新的本源文件条目：
-     * - 创建本源文件夹
-     * - 创建 current 文件
-     * - 创建 backups 文件夹
+     * - 在 files/ 下创建本源文件
+     * - 在 backups/ 下创建对应的备份子目录
      */
     bool createSource(const QString& name);
 
@@ -179,27 +178,27 @@ public:
      * @param backupName 备份名
      * @return 是否创建成功
      *
-     * 将本源文件的 current 内容复制到指定备份。
+     * 将本源文件的内容复制到指定备份。
      */
     bool createBackup(const QString& sourceName, const QString& backupName);
 
     /**
-     * @brief 从备份加载到 current
+     * @brief 从备份加载到本源文件
      * @param sourceName 本源文件名
      * @param backupName 备份名
      * @return 是否加载成功
      *
-     * 将指定备份的内容复制到本源文件的 current 位置。
+     * 将指定备份的内容复制到本源文件。
      */
     bool loadBackup(const QString& sourceName, const QString& backupName);
 
     /**
-     * @brief 复制文件到 current
+     * @brief 复制文件到本源文件
      * @param sourceName 本源文件名
      * @param sourceFile 要复制的源文件路径
      * @return 是否复制成功
      *
-     * 将指定文件复制到本源文件的 current 位置。
+     * 将指定文件复制到本源文件位置。
      */
     bool copyToCurrent(const QString& sourceName, const QString& sourceFile);
 
@@ -239,7 +238,7 @@ public:
     /**
      * @brief 获取本源文件的真实路径
      * @param virtualName 虚拟文件名
-     * @return 真实文件路径，如果是备份则返回本源文件的 current 路径
+     * @return 真实文件路径，如果是备份则返回本源文件路径
      */
     QString resolveRealPath(const QString& virtualName) const;
 
