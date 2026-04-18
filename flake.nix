@@ -34,12 +34,14 @@ rec {
                         nativeBuildInputs = with pkgs; [
                             cmake
                             ninja
+                            pkg-config
                             qt6.wrapQtAppsHook
                         ];
 
                         buildInputs = with pkgs; [
                             qt6.qtbase
                             qt6.qtdeclarative
+                            fuse3
                         ];
 
                         cmakeFlags = [
@@ -72,9 +74,12 @@ rec {
                 devShells.default = pkgs.mkShell {
                     packages = with pkgs; [
                         cmake
+                        ninja
+                        pkg-config
+
                         qt6.qtbase
                         qt6.qtdeclarative
-                        ninja
+                        fuse3
                     ];
 
                     inputsFrom = [ self.packages.${system}.default ];

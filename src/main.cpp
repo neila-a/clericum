@@ -1,5 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#define FUSE_USE_VERSION 30
+#include <fuse3/fuse.h>
 #include <QCommandLineParser>
 
 int main(int argc, char* argv[]) {

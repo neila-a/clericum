@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.1.2)
 
 if(NOT DEFINED GLOBAL_PROJECT_NAME)
     set(GLOBAL_PROJECT_NAME "error_to_load")
