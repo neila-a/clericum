@@ -22,9 +22,6 @@
 #define FUSE_USE_VERSION 30
 #include <fuse3/fuse.h>
 
-// 挂载点标记文件名
-static const char* MOUNT_MARKER_FILE = ".clericum-mount";
-
 // 静态成员初始化
 ClericumFuse* ClericumFuse::s_instance = nullptr;
 
@@ -117,9 +114,10 @@ int ClericumFuse::fuseGetattr(const char *path, struct stat *stbuf,
 
     // 检查是否是挂载点标记文件
     if (pathStr == MOUNT_MARKER_FILE) {
+        QByteArray storePathData = s_instance->storePath().toUtf8();
         stbuf->st_mode = S_IFREG | 0444;
         stbuf->st_nlink = 1;
-        stbuf->st_size = 0;  // 空文件
+        stbuf->st_size = storePathData.size();
         stbuf->st_mtime = QDateTime::currentSecsSinceEpoch();
         stbuf->st_atime = stbuf->st_mtime;
         stbuf->st_ctime = stbuf->st_mtime;
@@ -275,7 +273,15 @@ int ClericumFuse::fuseRead(const char *path, char *buf, size_t size,
 
     // 检查是否是挂载点标记文件
     if (pathStr == MOUNT_MARKER_FILE) {
-        // 空文件，无内容可读
+        QByteArray storePathData = s_instance->storePath().toUtf8();
+        if (offset < storePathData.size()) {
+            int avail = storePathData.size() - static_cast<int>(offset);
+            if (static_cast<int>(size) < avail) {
+                avail = static_cast<int>(size);
+            }
+            memcpy(buf, storePathData.constData() + offset, avail);
+            return avail;
+        }
         return 0;
     }
 

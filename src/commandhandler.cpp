@@ -91,8 +91,8 @@ CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
 CommandHandler::Result CommandHandler::executeUnload(const QString& mountPath) {
     // 使用 fusermount 卸载
     QProcess proc;
-    proc.start("fusermount", {"-u", mountPath});
-    return {proc.waitForFinished()};
+    proc.start("fusermount", { "-u", mountPath });
+    return { proc.waitForFinished() };
 }
 
 CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
@@ -112,22 +112,18 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
         return Result::fail("Invalid backup name", backupName);
     }
 
-
-    if (!mountInfo.fuse) {
-        return Result::fail("FUSE instance not available");
-    }
-
     // 解析本源文件名
     QString sourceName = extractSourceName(fileName);
 
     // 检查本源文件是否存在
-    auto storeManager = mountInfo.fuse->storeManager();
-    if (!storeManager->sourceExists(sourceName)) {
+    StoreManager storeManager;
+    storeManager.setStorePath(mountInfo.storePath);
+    if (!storeManager.sourceExists(sourceName)) {
         return Result::fail("Source file not found", sourceName);
     }
 
     // 检查备份名是否已存在
-    auto sourceInfo = storeManager->getSource(sourceName);
+    auto sourceInfo = storeManager.getSource(sourceName);
     for (const BackupInfo& backup : sourceInfo.backups) {
         if (backup.name == backupName) {
             return Result::fail("Backup already exists", backupName);
@@ -135,12 +131,9 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     }
 
     // 创建备份
-    if (!storeManager->createBackup(sourceName, backupName)) {
+    if (!storeManager.createBackup(sourceName, backupName)) {
         return Result::fail("Failed to create backup");
     }
-
-    // 刷新 FUSE 缓存
-    mountInfo.fuse->refreshCache();
 
     QString msg = QString("Backup '%1' created for '%2'")
         .arg(backupName, sourceName);
@@ -150,7 +143,12 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
 }
 
 bool CommandHandler::isPathMounted(const QString& path) const {
-    // 检查路径中是否存在挂载点标记文件 (.clericum-mount)
+    const MountInfo info = findMountPoint(path);
+    return !info.mountPath.isEmpty();
+}
+
+CommandHandler::MountInfo CommandHandler::findMountPoint(const QString& path) const {
+    // 检查路径中是否存在挂载点标记文件 (.clericum-mount，内容为 store 路径)
     QString checkPath = path;
     QFileInfo info(checkPath);
 
@@ -159,30 +157,25 @@ bool CommandHandler::isPathMounted(const QString& path) const {
         checkPath = info.absolutePath();
     }
 
+    MountInfo mountInfo;
+
     // 逐级向上查找标记文件
     QDir dir(checkPath);
     while (!dir.isRoot()) {
-        if (dir.exists(".clericum-mount")) {
-            return true;
+        if (dir.exists(MOUNT_MARKER_FILE)) {
+            mountInfo.mountPath = dir.absolutePath();
+            QFile file(dir.filePath(MOUNT_MARKER_FILE));
+            file.open(QIODevice::ReadOnly);
+            QString content = file.readAll();
+            file.close();
+            mountInfo.storePath = content.trimmed();
         }
         if (!dir.cdUp()) {
             break;
         }
     }
 
-    return false;
-}
-
-CommandHandler::MountInfo CommandHandler::findMountPoint(const QString& path) const {
-
-    // 规范化路径
-    QString normalizedPath = QDir::cleanPath(path);
-
-    // 查找最匹配的挂载点
-    QString bestMatch;
-    MountInfo bestInfo;
-
-    return bestInfo;
+    return mountInfo;
 }
 
 QString CommandHandler::extractFileName(const QString& virtualPath) {

@@ -23,6 +23,9 @@
 #define FUSE_USE_VERSION 30
 #include <fuse3/fuse.h>
 
+// 挂载点标记文件名
+static const char* MOUNT_MARKER_FILE = ".clericum-mount";
+
 /**
  * @class ClericumFuse
  * @brief FUSE 文件系统实现类
@@ -35,7 +38,7 @@
  * ### 虚拟文件系统结构 ###
  * @code
  * /mount/path/
- * ├── .clericum-mount          # 挂载点标记文件（空文件）
+ * ├── .clericum-mount          # 挂载点标记文件（内容为 store 路径）
  * ├── file1                    # 本源文件1的 current
  * ├── file2                    # 本源文件2的 current
  * ├── backup1-file1           # 本源文件1的 backup1 备份

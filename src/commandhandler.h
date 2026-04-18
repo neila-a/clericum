@@ -82,7 +82,6 @@ public:
     struct MountInfo {
         QString mountPath;        ///< 挂载点路径
         QString storePath;         ///< store 路径
-        QSharedPointer<ClericumFuse> fuse;  ///< FUSE 实例
     };
 
     /**
