@@ -9,26 +9,22 @@
 #include <QTextStream>
 #include <QDebug>
 
-StoreManager::StoreManager(QObject *parent)
-    : QObject{parent}
-{
+StoreManager::StoreManager(QObject* parent)
+    : QObject{ parent } {
 }
 
 StoreManager::~StoreManager() = default;
 
-void StoreManager::setStorePath(const QString &path)
-{
+void StoreManager::setStorePath(const QString& path) {
     m_storePath = path;
     m_cacheValid = false;
 }
 
-QString StoreManager::storePath() const
-{
+QString StoreManager::storePath() const {
     return m_storePath;
 }
 
-bool StoreManager::create(const QString &path)
-{
+bool StoreManager::create(const QString& path) {
     QDir dir(path);
 
     // 检查路径是否已存在
@@ -56,8 +52,7 @@ bool StoreManager::create(const QString &path)
     return isValidStore();
 }
 
-bool StoreManager::isValidStore(const QString &path) const
-{
+bool StoreManager::isValidStore(const QString& path) const {
     QFileInfo info(path);
     if (!info.exists() || !info.isDir()) {
         return false;
@@ -67,13 +62,11 @@ bool StoreManager::isValidStore(const QString &path) const
     return metaFile.exists() && metaFile.isFile();
 }
 
-bool StoreManager::isValidStore() const
-{
+bool StoreManager::isValidStore() const {
     return isValidStore(m_storePath);
 }
 
-void StoreManager::refreshCache() const
-{
+void StoreManager::refreshCache() const {
     m_cache.clear();
 
     if (!isValidStore()) {
@@ -84,7 +77,7 @@ void StoreManager::refreshCache() const
     QDir storeDir(m_storePath);
     const auto entries = storeDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    for (const QString &entry : entries) {
+    for (const QString& entry : entries) {
         // 跳过元数据文件
         if (entry == METADATA_FILENAME) {
             continue;
@@ -100,7 +93,7 @@ void StoreManager::refreshCache() const
         QDir backupsDir(sourceInfo.backupsPath);
         if (backupsDir.exists()) {
             const auto backupEntries = backupsDir.entryList(QDir::Files);
-            for (const QString &backupEntry : backupEntries) {
+            for (const QString& backupEntry : backupEntries) {
                 BackupInfo backupInfo;
                 backupInfo.name = backupEntry;
                 backupInfo.fullPath = sourceInfo.backupsPath + "/" + backupEntry;
@@ -114,8 +107,7 @@ void StoreManager::refreshCache() const
     m_cacheValid = true;
 }
 
-QVector<SourceInfo> StoreManager::getAllSources() const
-{
+QVector<SourceInfo> StoreManager::getAllSources() const {
     if (!m_cacheValid) {
         refreshCache();
     }
@@ -123,8 +115,7 @@ QVector<SourceInfo> StoreManager::getAllSources() const
     return QVector<SourceInfo>::fromList(m_cache.values());
 }
 
-SourceInfo StoreManager::getSource(const QString &name) const
-{
+SourceInfo StoreManager::getSource(const QString& name) const {
     if (!m_cacheValid) {
         refreshCache();
     }
@@ -132,14 +123,12 @@ SourceInfo StoreManager::getSource(const QString &name) const
     return m_cache.value(name);
 }
 
-QString StoreManager::getCurrentPath(const QString &name) const
-{
+QString StoreManager::getCurrentPath(const QString& name) const {
     SourceInfo info = getSource(name);
     return info.currentPath;
 }
 
-bool StoreManager::createSource(const QString &name)
-{
+bool StoreManager::createSource(const QString& name) {
     QString sourcePath = m_storePath + "/" + name;
 
     QDir dir;
@@ -166,8 +155,7 @@ bool StoreManager::createSource(const QString &name)
     return true;
 }
 
-bool StoreManager::createBackup(const QString &sourceName, const QString &backupName)
-{
+bool StoreManager::createBackup(const QString& sourceName, const QString& backupName) {
     SourceInfo sourceInfo = getSource(sourceName);
     if (sourceInfo.currentPath.isEmpty()) {
         qWarning() << "Source not found:" << sourceName;
@@ -186,8 +174,7 @@ bool StoreManager::createBackup(const QString &sourceName, const QString &backup
     return true;
 }
 
-bool StoreManager::copyToCurrent(const QString &sourceName, const QString &sourceFile)
-{
+bool StoreManager::copyToCurrent(const QString& sourceName, const QString& sourceFile) {
     SourceInfo sourceInfo = getSource(sourceName);
     if (sourceInfo.currentPath.isEmpty()) {
         qWarning() << "Source not found:" << sourceName;
@@ -211,8 +198,7 @@ bool StoreManager::copyToCurrent(const QString &sourceName, const QString &sourc
     return true;
 }
 
-bool StoreManager::sourceExists(const QString &name) const
-{
+bool StoreManager::sourceExists(const QString& name) const {
     if (!m_cacheValid) {
         refreshCache();
     }
@@ -220,8 +206,7 @@ bool StoreManager::sourceExists(const QString &name) const
     return m_cache.contains(name);
 }
 
-QMap<QString, QString> StoreManager::getFlatFileList() const
-{
+QMap<QString, QString> StoreManager::getFlatFileList() const {
     QMap<QString, QString> result;
 
     if (!m_cacheValid) {
@@ -229,7 +214,7 @@ QMap<QString, QString> StoreManager::getFlatFileList() const
     }
 
     for (auto it = m_cache.constBegin(); it != m_cache.constEnd(); ++it) {
-        const SourceInfo &sourceInfo = it.value();
+        const SourceInfo& sourceInfo = it.value();
 
         // 添加本源文件（current）
         if (QFileInfo::exists(sourceInfo.currentPath)) {
@@ -237,7 +222,7 @@ QMap<QString, QString> StoreManager::getFlatFileList() const
         }
 
         // 添加备份文件（命名为 "备份名-本源名"）
-        for (const BackupInfo &backup : sourceInfo.backups) {
+        for (const BackupInfo& backup : sourceInfo.backups) {
             QString virtualName = backup.name + "-" + sourceInfo.name;
             result.insert(virtualName, sourceInfo.currentPath);
         }
@@ -246,10 +231,9 @@ QMap<QString, QString> StoreManager::getFlatFileList() const
     return result;
 }
 
-bool StoreManager::parseVirtualName(const QString &virtualName,
-                                     QString &actualSourceName,
-                                     bool &isBackup) const
-{
+bool StoreManager::parseVirtualName(const QString& virtualName,
+    QString& actualSourceName,
+    bool& isBackup) const {
     // 检查是否是备份文件（格式：备份名-本源名）
     // 需要找到最后一个 '-' 后的本源名
 
@@ -260,7 +244,7 @@ bool StoreManager::parseVirtualName(const QString &virtualName,
     const QStringList sourceNames = m_cache.keys();
     QString longestMatch;
 
-    for (const QString &sourceName : sourceNames) {
+    for (const QString& sourceName : sourceNames) {
         QString prefix = "-" + sourceName;
         if (virtualName.endsWith(prefix)) {
             // 检查这个前缀是否是有效的（即前面的部分是备份名）
@@ -290,8 +274,7 @@ bool StoreManager::parseVirtualName(const QString &virtualName,
     return false;
 }
 
-QString StoreManager::resolveRealPath(const QString &virtualName) const
-{
+QString StoreManager::resolveRealPath(const QString& virtualName) const {
     QString sourceName;
     bool isBackup;
 
@@ -303,8 +286,7 @@ QString StoreManager::resolveRealPath(const QString &virtualName) const
     return QString();
 }
 
-bool StoreManager::isBackupFile(const QString &virtualName) const
-{
+bool StoreManager::isBackupFile(const QString& virtualName) const {
     QString sourceName;
     bool isBackup;
 
@@ -315,8 +297,7 @@ bool StoreManager::isBackupFile(const QString &virtualName) const
     return false;
 }
 
-QStringList StoreManager::getSourceNames() const
-{
+QStringList StoreManager::getSourceNames() const {
     if (!m_cacheValid) {
         refreshCache();
     }

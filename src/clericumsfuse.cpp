@@ -18,80 +18,67 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// FUSE 3 API
+ // FUSE 3 API
 #define FUSE_USE_VERSION 30
 #include <fuse3/fuse.h>
 
 // 静态成员初始化
 ClericumFuse* ClericumFuse::s_instance = nullptr;
 
-ClericumFuse::ClericumFuse(QObject *parent)
-    : QObject{parent}
-    , m_storeManager(new StoreManager(this))
-{
+ClericumFuse::ClericumFuse(QObject* parent)
+    : QObject{ parent }
+    , m_storeManager(new StoreManager(this)) {
     s_instance = this;
 }
 
-ClericumFuse::~ClericumFuse()
-{
+ClericumFuse::~ClericumFuse() {
     s_instance = nullptr;
 }
 
-void ClericumFuse::setStorePath(const QString &path)
-{
+void ClericumFuse::setStorePath(const QString& path) {
     m_storeManager->setStorePath(path);
 }
 
-QString ClericumFuse::storePath() const
-{
+QString ClericumFuse::storePath() const {
     return m_storeManager->storePath();
 }
 
-void ClericumFuse::setMountPath(const QString &path)
-{
+void ClericumFuse::setMountPath(const QString& path) {
     m_mountPath = path;
 }
 
-QString ClericumFuse::mountPath() const
-{
+QString ClericumFuse::mountPath() const {
     return m_mountPath;
 }
 
-ClericumFuse::MountStatus ClericumFuse::status() const
-{
+ClericumFuse::MountStatus ClericumFuse::status() const {
     return m_status;
 }
 
-void ClericumFuse::refreshCache()
-{
+void ClericumFuse::refreshCache() {
     m_fileList = m_storeManager->getFlatFileList();
 }
 
-QStringList ClericumFuse::fileNames() const
-{
+QStringList ClericumFuse::fileNames() const {
     return m_fileList.keys();
 }
 
-QString ClericumFuse::resolvePath(const QString &name) const
-{
+QString ClericumFuse::resolvePath(const QString& name) const {
     return m_fileList.value(name, QString());
 }
 
-bool ClericumFuse::isBackupFile(const QString &name) const
-{
+bool ClericumFuse::isBackupFile(const QString& name) const {
     return m_storeManager->isBackupFile(name);
 }
 
-QSharedPointer<StoreManager> ClericumFuse::storeManager() const
-{
+QSharedPointer<StoreManager> ClericumFuse::storeManager() const {
     return m_storeManager;
 }
 
 // ============== FUSE 回调实现 ==============
 
-int ClericumFuse::fuseGetattr(const char *path, struct stat *stbuf,
-                              struct fuse_file_info *fi)
-{
+int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
+    struct fuse_file_info* fi) {
     Q_UNUSED(fi);
 
     if (!s_instance) {
@@ -145,8 +132,7 @@ int ClericumFuse::fuseGetattr(const char *path, struct stat *stbuf,
     return 0;
 }
 
-int ClericumFuse::fuseAccess(const char *path, int mask)
-{
+int ClericumFuse::fuseAccess(const char* path, int mask) {
     if (!s_instance) {
         return -ENOENT;
     }
@@ -188,12 +174,11 @@ int ClericumFuse::fuseAccess(const char *path, int mask)
     return 0;
 }
 
-int ClericumFuse::fuseReaddir(const char *path, void *buf,
-                               fuse_fill_dir_t filler,
-                               off_t offset,
-                               struct fuse_file_info *fi,
-                               enum fuse_readdir_flags flags)
-{
+int ClericumFuse::fuseReaddir(const char* path, void* buf,
+    fuse_fill_dir_t filler,
+    off_t offset,
+    struct fuse_file_info* fi,
+    enum fuse_readdir_flags flags) {
     Q_UNUSED(offset);
     Q_UNUSED(fi);
     Q_UNUSED(flags);
@@ -218,16 +203,15 @@ int ClericumFuse::fuseReaddir(const char *path, void *buf,
 
     // 添加所有虚拟文件
     for (auto it = s_instance->m_fileList.constBegin();
-         it != s_instance->m_fileList.constEnd(); ++it) {
+        it != s_instance->m_fileList.constEnd(); ++it) {
         filler(buf, qPrintable(it.key()), nullptr, 0,
-               static_cast<fuse_fill_dir_flags>(0));
+            static_cast<fuse_fill_dir_flags>(0));
     }
 
     return 0;
 }
 
-int ClericumFuse::fuseOpen(const char *path, struct fuse_file_info *fi)
-{
+int ClericumFuse::fuseOpen(const char* path, struct fuse_file_info* fi) {
     if (!s_instance) {
         return -ENOENT;
     }
@@ -259,9 +243,8 @@ int ClericumFuse::fuseOpen(const char *path, struct fuse_file_info *fi)
     return 0;
 }
 
-int ClericumFuse::fuseRead(const char *path, char *buf, size_t size,
-                            off_t offset, struct fuse_file_info *fi)
-{
+int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
+    off_t offset, struct fuse_file_info* fi) {
     Q_UNUSED(fi);
 
     if (!s_instance) {
@@ -306,9 +289,8 @@ int ClericumFuse::fuseRead(const char *path, char *buf, size_t size,
     return static_cast<int>(bytesRead);
 }
 
-int ClericumFuse::fuseWrite(const char *path, const char *buf, size_t size,
-                             off_t offset, struct fuse_file_info *fi)
-{
+int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
+    off_t offset, struct fuse_file_info* fi) {
     Q_UNUSED(fi);
 
     if (!s_instance) {
@@ -345,9 +327,8 @@ int ClericumFuse::fuseWrite(const char *path, const char *buf, size_t size,
     return static_cast<int>(bytesWritten);
 }
 
-int ClericumFuse::fuseCreate(const char *path, mode_t mode,
-                              struct fuse_file_info *fi)
-{
+int ClericumFuse::fuseCreate(const char* path, mode_t mode,
+    struct fuse_file_info* fi) {
     Q_UNUSED(mode);
 
     if (!s_instance) {
@@ -397,8 +378,7 @@ static struct fuse_operations clericFuseOps = {
     .create = ClericumFuse::fuseCreate,
 };
 
-bool ClericumFuse::mount()
-{
+bool ClericumFuse::mount() {
     if (m_status == MountStatus::Mounted) {
         qWarning() << "Already mounted";
         return false;
@@ -436,7 +416,7 @@ bool ClericumFuse::mount()
 
     // FUSE 参数 - 不使用调试模式 (-d)，fuse_main 会自动后台运行
     QByteArray mountPointBytes = m_mountPath.toUtf8();
-    char *args[] = {
+    char* args[] = {
         const_cast<char*>(_PROJECT_NAME),
         mountPointBytes.data(),  // 挂载点
     };

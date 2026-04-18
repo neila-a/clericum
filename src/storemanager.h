@@ -19,9 +19,9 @@
 #include <QSharedPointer>
 #include <QFile>
 
-/**
- * @brief 备份文件信息结构
- */
+ /**
+  * @brief 备份文件信息结构
+  */
 struct BackupInfo {
     QString name;           ///< 备份文件名
     QString fullPath;       ///< 完整路径
@@ -73,8 +73,7 @@ struct SourceInfo {
  * auto sources = manager.getAllSources();
  * @endcode
  */
-class StoreManager : public QObject
-{
+class StoreManager : public QObject {
     Q_OBJECT
 
 public:
@@ -89,7 +88,7 @@ public:
      * @brief 构造函数
      * @param parent 父对象
      */
-    explicit StoreManager(QObject *parent = nullptr);
+    explicit StoreManager(QObject* parent = nullptr);
 
     /**
      * @brief 析构函数
@@ -100,7 +99,7 @@ public:
      * @brief 设置 store 文件夹路径
      * @param path store 文件夹路径
      */
-    void setStorePath(const QString &path);
+    void setStorePath(const QString& path);
 
     /**
      * @brief 获取当前 store 文件夹路径
@@ -124,14 +123,14 @@ public:
      * }
      * @endcode
      */
-    bool create(const QString &path);
+    bool create(const QString& path);
 
     /**
      * @brief 检查指定路径是否为有效的 store 文件夹
      * @param path 要检查的路径
      * @return 是否为有效的 store
      */
-    bool isValidStore(const QString &path) const;
+    bool isValidStore(const QString& path) const;
 
     /**
      * @brief 检查当前设置的 store 是否有效
@@ -153,14 +152,14 @@ public:
      * @param name 本源文件名
      * @return 本源文件信息，如果不存在则返回空结构
      */
-    SourceInfo getSource(const QString &name) const;
+    SourceInfo getSource(const QString& name) const;
 
     /**
      * @brief 获取本源文件的 current 文件路径
      * @param name 本源文件名
      * @return current 文件完整路径
      */
-    QString getCurrentPath(const QString &name) const;
+    QString getCurrentPath(const QString& name) const;
 
     /**
      * @brief 创建新的本源文件条目
@@ -172,7 +171,7 @@ public:
      * - 创建 current 文件
      * - 创建 backups 文件夹
      */
-    bool createSource(const QString &name);
+    bool createSource(const QString& name);
 
     /**
      * @brief 创建备份
@@ -182,7 +181,7 @@ public:
      *
      * 将本源文件的 current 内容复制到指定备份。
      */
-    bool createBackup(const QString &sourceName, const QString &backupName);
+    bool createBackup(const QString& sourceName, const QString& backupName);
 
     /**
      * @brief 复制文件到 current
@@ -192,14 +191,14 @@ public:
      *
      * 将指定文件复制到本源文件的 current 位置。
      */
-    bool copyToCurrent(const QString &sourceName, const QString &sourceFile);
+    bool copyToCurrent(const QString& sourceName, const QString& sourceFile);
 
     /**
      * @brief 检查本源文件是否存在
      * @param name 本源文件名
      * @return 是否存在
      */
-    bool sourceExists(const QString &name) const;
+    bool sourceExists(const QString& name) const;
 
     /**
      * @brief 获取 store 路径下的所有条目（平铺视图）
@@ -223,23 +222,23 @@ public:
      * - 对于本源文件：直接是本源文件名
      * - 对于备份文件：是 "备份名-本源名" 格式
      */
-    bool parseVirtualName(const QString &virtualName,
-                          QString &actualSourceName,
-                          bool &isBackup) const;
+    bool parseVirtualName(const QString& virtualName,
+        QString& actualSourceName,
+        bool& isBackup) const;
 
     /**
      * @brief 获取本源文件的真实路径
      * @param virtualName 虚拟文件名
      * @return 真实文件路径，如果是备份则返回本源文件的 current 路径
      */
-    QString resolveRealPath(const QString &virtualName) const;
+    QString resolveRealPath(const QString& virtualName) const;
 
     /**
      * @brief 检查文件是否为备份文件
      * @param virtualName 虚拟文件名
      * @return 是否为备份文件
      */
-    bool isBackupFile(const QString &virtualName) const;
+    bool isBackupFile(const QString& virtualName) const;
 
     /**
      * @brief 获取 store 中的本源文件名列表

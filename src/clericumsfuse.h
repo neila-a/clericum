@@ -22,7 +22,7 @@
 #define FUSE_USE_VERSION 30
 #include <fuse3/fuse.h>
 
-// 挂载点标记文件名
+ // 挂载点标记文件名
 static const char* MOUNT_MARKER_FILE = ".clericum-mount";
 
 /**
@@ -54,8 +54,7 @@ static const char* MOUNT_MARKER_FILE = ".clericum-mount";
  * fuse.mount();
  * @endcode
  */
-class ClericumFuse : public QObject
-{
+class ClericumFuse : public QObject {
     Q_OBJECT
 
 public:
@@ -69,13 +68,13 @@ public:
         Unmounting,    ///< 正在卸载
         Error          ///< 错误
     };
-    Q_ENUM(MountStatus)
+    Q_ENUM(MountStatus);
 
     /**
      * @brief 构造函数
      * @param parent 父对象
      */
-    explicit ClericumFuse(QObject *parent = nullptr);
+    explicit ClericumFuse(QObject* parent = nullptr);
 
     /**
      * @brief 析构函数
@@ -86,7 +85,7 @@ public:
      * @brief 设置 store 文件夹路径
      * @param path store 文件夹路径
      */
-    void setStorePath(const QString &path);
+    void setStorePath(const QString& path);
 
     /**
      * @brief 获取 store 文件夹路径
@@ -98,7 +97,7 @@ public:
      * @brief 设置挂载点路径
      * @param path 挂载点路径
      */
-    void setMountPath(const QString &path);
+    void setMountPath(const QString& path);
 
     /**
      * @brief 获取挂载点路径
@@ -136,14 +135,14 @@ public:
      * @param name 虚拟文件名
      * @return 真实文件路径
      */
-    QString resolvePath(const QString &name) const;
+    QString resolvePath(const QString& name) const;
 
     /**
      * @brief 检查是否为备份文件
      * @param name 虚拟文件名
      * @return 是否为备份文件
      */
-    bool isBackupFile(const QString &name) const;
+    bool isBackupFile(const QString& name) const;
 
     /**
      * @brief 获取底层 StoreManager
@@ -157,43 +156,43 @@ public:
     /**
      * @brief 获取文件系统属性
      */
-    static int fuseGetattr(const char *path, struct stat *stbuf,
-                           struct fuse_file_info *fi);
+    static int fuseGetattr(const char* path, struct stat* stbuf,
+        struct fuse_file_info* fi);
 
     /**
      * @brief 访问文件
      */
-    static int fuseAccess(const char *path, int mask);
+    static int fuseAccess(const char* path, int mask);
 
     /**
      * @brief 读取目录
      */
-    static int fuseReaddir(const char *path, void *buf, fuse_fill_dir_t filler,
-                            off_t offset, struct fuse_file_info *fi,
-                            enum fuse_readdir_flags flags);
+    static int fuseReaddir(const char* path, void* buf, fuse_fill_dir_t filler,
+        off_t offset, struct fuse_file_info* fi,
+        enum fuse_readdir_flags flags);
 
     /**
      * @brief 打开文件
      */
-    static int fuseOpen(const char *path, struct fuse_file_info *fi);
+    static int fuseOpen(const char* path, struct fuse_file_info* fi);
 
     /**
      * @brief 读取文件
      */
-    static int fuseRead(const char *path, char *buf, size_t size,
-                         off_t offset, struct fuse_file_info *fi);
+    static int fuseRead(const char* path, char* buf, size_t size,
+        off_t offset, struct fuse_file_info* fi);
 
     /**
      * @brief 写入文件
      */
-    static int fuseWrite(const char *path, const char *buf, size_t size,
-                         off_t offset, struct fuse_file_info *fi);
+    static int fuseWrite(const char* path, const char* buf, size_t size,
+        off_t offset, struct fuse_file_info* fi);
 
     /**
      * @brief 创建文件
      */
-    static int fuseCreate(const char *path, mode_t mode,
-                          struct fuse_file_info *fi);
+    static int fuseCreate(const char* path, mode_t mode,
+        struct fuse_file_info* fi);
 
 signals:
     /**
@@ -216,7 +215,7 @@ signals:
      * @brief 错误信号
      * @param error 错误信息
      */
-    void errorOccurred(const QString &error);
+    void errorOccurred(const QString& error);
 
 private:
     static ClericumFuse* s_instance;  ///< 静态实例指针，用于 FUSE 回调

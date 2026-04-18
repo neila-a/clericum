@@ -17,37 +17,36 @@
 #include <QString>
 #include <QMap>
 
-/**
- * @class CommandHandler
- * @brief 命令处理器类
- *
- * CommandHandler 管理所有 clericum 命令的执行：
- * - create: 创建新的 store 文件夹
- * - load: 挂载 FUSE 文件系统
- * - unload: 卸载 FUSE 文件系统
- * - backup: 创建文件备份
- *
- * ### 命令使用示例 ###
- *
- * #### create 命令 ####
- * @code
- * CommandHandler handler;
- * handler.executeCreate("/path/to/store");
- * @endcode
- *
- * #### load 命令 ####
- * @code
- * CommandHandler handler;
- * handler.executeLoad("/path/to/store", "/path/to/mount");
- * @endcode
- *
- * #### backup 命令 ####
- * @code
- * handler.executeBackup("/path/to/mount/file", "backup-name");
- * @endcode
- */
-class CommandHandler : public QObject
-{
+ /**
+  * @class CommandHandler
+  * @brief 命令处理器类
+  *
+  * CommandHandler 管理所有 clericum 命令的执行：
+  * - create: 创建新的 store 文件夹
+  * - load: 挂载 FUSE 文件系统
+  * - unload: 卸载 FUSE 文件系统
+  * - backup: 创建文件备份
+  *
+  * ### 命令使用示例 ###
+  *
+  * #### create 命令 ####
+  * @code
+  * CommandHandler handler;
+  * handler.executeCreate("/path/to/store");
+  * @endcode
+  *
+  * #### load 命令 ####
+  * @code
+  * CommandHandler handler;
+  * handler.executeLoad("/path/to/store", "/path/to/mount");
+  * @endcode
+  *
+  * #### backup 命令 ####
+  * @code
+  * handler.executeBackup("/path/to/mount/file", "backup-name");
+  * @endcode
+  */
+class CommandHandler : public QObject {
     Q_OBJECT
 
 public:
@@ -60,18 +59,18 @@ public:
         QString error;        ///< 错误信息（如果有）
 
         /** @brief 成功结果 */
-        static Result ok(const QString &msg = QString()) {
-            return {true, msg, QString()};
+        static Result ok(const QString& msg = QString()) {
+            return { true, msg, QString() };
         }
 
         /** @brief 失败结果 */
-        static Result fail(const QString &err) {
-            return {false, QString(), err};
+        static Result fail(const QString& err) {
+            return { false, QString(), err };
         }
 
         /** @brief 失败结果（带消息） */
-        static Result fail(const QString &msg, const QString &err) {
-            return {false, msg, err};
+        static Result fail(const QString& msg, const QString& err) {
+            return { false, msg, err };
         }
     };
 
@@ -87,7 +86,7 @@ public:
      * @brief 构造函数
      * @param parent 父对象
      */
-    explicit CommandHandler(QObject *parent = nullptr);
+    explicit CommandHandler(QObject* parent = nullptr);
 
     /**
      * @brief 析构函数
@@ -103,7 +102,7 @@ public:
      * - 标记文件 (.clericum-store)
      * - 初始的空结构
      */
-    Q_INVOKABLE Result executeCreate(const QString &path);
+    Q_INVOKABLE Result executeCreate(const QString& path);
 
     /**
      * @brief 执行 load 命令
@@ -113,7 +112,7 @@ public:
      *
      * 挂载一个 FUSE 文件系统到指定位置，展示 store 中的文件。
      */
-    Q_INVOKABLE Result executeLoad(const QString &storePath, const QString &mountPath);
+    Q_INVOKABLE Result executeLoad(const QString& storePath, const QString& mountPath);
 
     /**
      * @brief 执行 unload 命令
@@ -122,7 +121,7 @@ public:
      *
      * 卸载指定挂载点的 FUSE 文件系统。
      */
-    Q_INVOKABLE Result executeUnload(const QString &mountPath);
+    Q_INVOKABLE Result executeUnload(const QString& mountPath);
 
     /**
      * @brief 执行 backup 命令
@@ -135,7 +134,7 @@ public:
      * - /mount/path/filename - 本源文件
      * - /mount/path/backupname-filename - 备份文件
      */
-    Q_INVOKABLE Result executeBackup(const QString &virtualPath, const QString &backupName);
+    Q_INVOKABLE Result executeBackup(const QString& virtualPath, const QString& backupName);
 
     /**
      * @brief 检查路径是否在已挂载的文件系统中
@@ -144,21 +143,21 @@ public:
      *
      * 检查指定路径是否是某个挂载点的子路径。
      */
-    Q_INVOKABLE bool isPathMounted(const QString &path) const;
+    Q_INVOKABLE bool isPathMounted(const QString& path) const;
 
     /**
      * @brief 根据路径查找挂载点信息
      * @param path 文件路径
      * @return 挂载点信息，如果不在任何挂载点中则返回 nullptr
      */
-    Q_INVOKABLE MountInfo findMountPoint(const QString &path) const;
+    Q_INVOKABLE MountInfo findMountPoint(const QString& path) const;
 
     /**
      * @brief 从虚拟路径提取文件名
      * @param virtualPath 虚拟路径
      * @return 文件名（不含路径）
      */
-    static QString extractFileName(const QString &virtualPath);
+    static QString extractFileName(const QString& virtualPath);
 
     /**
      * @brief 从虚拟路径提取本源文件名
@@ -167,7 +166,7 @@ public:
      *
      * 对于备份文件（backupname-filename），返回 filename。
      */
-    static QString extractSourceName(const QString &virtualPath);
+    static QString extractSourceName(const QString& virtualPath);
 
     /**
      * @brief 验证路径是否安全
@@ -176,7 +175,7 @@ public:
      *
      * 检查路径是否包含不安全的字符或模式。
      */
-    static bool validatePath(const QString &path);
+    static bool validatePath(const QString& path);
 
 signals:
     /**
@@ -184,17 +183,17 @@ signals:
      * @param success 是否成功
      * @param message 结果消息
      */
-    void commandFinished(bool success, const QString &message);
+    void commandFinished(bool success, const QString& message);
 
     /**
      * @brief 挂载完成信号
      * @param mountPath 挂载点路径
      */
-    void mounted(const QString &mountPath);
+    void mounted(const QString& mountPath);
 
     /**
      * @brief 卸载完成信号
      * @param mountPath 挂载点路径
      */
-    void unmounted(const QString &mountPath);
+    void unmounted(const QString& mountPath);
 };

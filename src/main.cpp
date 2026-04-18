@@ -41,12 +41,11 @@
 
 #include "commandhandler.h"
 
-// 全局命令处理器指针，用于信号处理
-static CommandHandler *g_handler = nullptr;
+ // 全局命令处理器指针，用于信号处理
+static CommandHandler* g_handler = nullptr;
 
 // 信号处理函数
-static void signalHandler(int signum)
-{
+static void signalHandler(int signum) {
     qInfo() << "Received signal" << signum << ", shutting down...";
     QCoreApplication::quit();
 }
@@ -56,8 +55,7 @@ static void signalHandler(int signum)
  *
  * 处理命令行参数并执行相应命令。
  */
-int main(int argc, char *argv[])
-{
+int main(int argc, char* argv[]) {
     QCoreApplication app(argc, argv);
 
     app.setApplicationName(_PROJECT_NAME);
@@ -67,12 +65,12 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
     parser.setApplicationDescription(
         QStringLiteral("%1 - A FUSE-based file backup and virtual filesystem tool\n\n"
-                       "Commands:\n"
-                       "  create <path>         Create a new store folder\n"
-                       "  load <store> <path>   Mount store to path\n"
-                       "  unload <path>         Unmount filesystem\n"
-                       "  backup <path> <name>  Create backup of file\n"
-                       "  gui                   Launch GUI (not implemented)")
+            "Commands:\n"
+            "  create <path>         Create a new store folder\n"
+            "  load <store> <path>   Mount store to path\n"
+            "  unload <path>         Unmount filesystem\n"
+            "  backup <path> <name>  Create backup of file\n"
+            "  gui                   Launch GUI (not implemented)")
         .arg(_PROJECT_NAME)
     );
 
