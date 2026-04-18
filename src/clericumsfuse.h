@@ -9,8 +9,7 @@
  * @sa StoreManager
  */
 
-#ifndef CLERICUMSFUSE_H
-#define CLERICUMSFUSE_H
+#pragma once
 
 #include "storemanager.h"
 
@@ -227,5 +226,3 @@ private:
     MountStatus m_status = MountStatus::NotMounted;  ///< 挂载状态
     QMap<QString, QString> m_fileList;            ///< 虚拟文件名到真实路径的映射
 };
-
-#endif // CLERICUMSFUSE_H

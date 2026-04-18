@@ -8,8 +8,7 @@
  * @sa ClericumFuse
  */
 
-#ifndef STOREMANAGER_H
-#define STOREMANAGER_H
+#pragma once
 
 #include <QObject>
 #include <QString>
@@ -258,5 +257,3 @@ private:
     mutable QMap<QString, SourceInfo> m_cache;  ///< 本源文件信息缓存
     mutable bool m_cacheValid = false;      ///< 缓存是否有效
 };
-
-#endif // STOREMANAGER_H

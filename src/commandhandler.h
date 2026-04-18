@@ -9,8 +9,7 @@
  * @sa StoreManager
  */
 
-#ifndef COMMANDHANDLER_H
-#define COMMANDHANDLER_H
+#pragma once
 
 #include "clericumsfuse.h"
 
@@ -199,5 +198,3 @@ signals:
      */
     void unmounted(const QString &mountPath);
 };
-
-#endif // COMMANDHANDLER_H
