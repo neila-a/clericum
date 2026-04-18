@@ -219,7 +219,10 @@ CommandHandler::MountInfo CommandHandler::findMountPoint(const QString& path) co
         if (dir.exists(MOUNT_MARKER_FILE)) {
             mountInfo.mountPath = dir.absolutePath();
             QFile file(dir.filePath(MOUNT_MARKER_FILE));
-            file.open(QIODevice::ReadOnly);
+            if (!file.open(QIODevice::ReadOnly)) {
+                qWarning() << "Failed to open mount marker file" << file.fileName();
+                return mountInfo;
+            }
             QString content = file.readAll();
             file.close();
             mountInfo.storePath = content.trimmed();

@@ -163,12 +163,10 @@ int ClericumFuse::fuseAccess(const char* path, int mask) {
         return -ENOENT;
     }
 
-    // 检查写权限（对于备份文件重定向到本源文件处理）
+    // 检查写权限（备份文件的写入重定向到本源文件处理）
     if (mask & W_OK) {
-        // 备份文件只读，本源文件可写
-        if (s_instance->m_storeManager->isBackupFile(pathStr)) {
-            return -EACCES;
-        }
+        // 本源文件可写，备份文件的写权限也允许（会重定向到本源）
+        // 不再对备份文件返回 -EACCES
     }
 
     return 0;
@@ -233,11 +231,9 @@ int ClericumFuse::fuseOpen(const char* path, struct fuse_file_info* fi) {
         return -ENOENT;
     }
 
-    // 备份文件只读打开
+    // 备份文件允许写操作（写入会重定向到本源文件）
     if (s_instance->m_storeManager->isBackupFile(pathStr)) {
-        if ((fi->flags & O_ACCMODE) != O_RDONLY) {
-            return -EACCES;
-        }
+        // 允许任何模式打开，写操作会重定向到本源文件
     }
 
     return 0;
@@ -300,9 +296,28 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
 
-    // 备份文件不允许写入
+    // 备份文件的写入重定向到本源文件
     if (s_instance->m_storeManager->isBackupFile(pathStr)) {
-        return -EACCES;
+        // 使用 resolveRealPath 获取本源文件的 current 路径进行写入
+        QString realPath = s_instance->m_storeManager->resolveRealPath(pathStr);
+        if (realPath.isEmpty()) {
+            return -ENOENT;
+        }
+
+        QFile file(realPath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            return -EIO;
+        }
+
+        if (!file.seek(offset)) {
+            file.close();
+            return -EIO;
+        }
+
+        qint64 bytesWritten = file.write(buf, size);
+        file.close();
+
+        return static_cast<int>(bytesWritten);
     }
 
     QString realPath = s_instance->m_fileList.value(pathStr);
