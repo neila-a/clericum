@@ -122,11 +122,12 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
         return Result::fail("Source file not found", sourceName);
     }
 
-    // 检查备份名是否已存在
+    // 检查备份名是否已存在，如果存在就先删除
     auto sourceInfo = storeManager.getSource(sourceName);
     for (const BackupInfo& backup : sourceInfo.backups) {
         if (backup.name == backupName) {
-            return Result::fail("Backup already exists", backupName);
+            qWarning() << "Backup already exists" << backupName;
+            QFile::remove(sourceInfo.backupsPath + "/" + backup.name);
         }
     }
 
