@@ -1,77 +1,4 @@
-/**
- * @file clericumsfuse.cpp
- * @brief ClericumFuse 类实现
- */
-
-#include "clericumsfuse.h"
-
-#include <QCoreApplication>
-#include <QDebug>
-#include <QFile>
-#include <QFileInfo>
-#include <QDateTime>
-#include <QProcess>
-#include <cerrno>
-#include <cstring>
-#include <memory>
-#include <signal.h>
-#include <sys/types.h>
-#include <unistd.h>
-
- // FUSE 3 API
-#define FUSE_USE_VERSION 30
-#include <fuse3/fuse.h>
-
-// 静态成员初始化
-ClericumFuse* ClericumFuse::s_instance = nullptr;
-
-ClericumFuse::ClericumFuse(QObject* parent)
-    : QObject{ parent }
-    , m_storeManager(new StoreManager(this)) {
-    s_instance = this;
-}
-
-ClericumFuse::~ClericumFuse() {
-    s_instance = nullptr;
-}
-
-void ClericumFuse::setStorePath(const QString& path) {
-    m_storeManager->setStorePath(path);
-}
-
-QString ClericumFuse::storePath() const {
-    return m_storeManager->storePath();
-}
-
-void ClericumFuse::setMountPath(const QString& path) {
-    m_mountPath = path;
-}
-
-QString ClericumFuse::mountPath() const {
-    return m_mountPath;
-}
-
-ClericumFuse::MountStatus ClericumFuse::status() const {
-    return m_status;
-}
-
-QStringList ClericumFuse::fileNames() const {
-    return getFileList().keys();
-}
-
-QString ClericumFuse::resolvePath(const QString& name) const {
-    return getFileList().value(name, QString());
-}
-
-bool ClericumFuse::isBackupFile(const QString& name) const {
-    return m_storeManager->isBackupFile(name);
-}
-
-QSharedPointer<StoreManager> ClericumFuse::storeManager() const {
-    return m_storeManager;
-}
-
-// ============== FUSE 回调实现 ==============
+#include "clericumfuse.h"
 
 int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
     struct fuse_file_info* fi) {
@@ -147,15 +74,9 @@ int ClericumFuse::fuseUnlink(const char* path) {
         return -ENOENT;
     }
 
-    // 如果是备份文件，删除备份文件
+    // 如果是备份文件，不能删除备份文件
     if (s_instance->m_storeManager->isBackupFile(pathStr)) {
-        QFile file(realPath);
-        if (!file.remove()) {
-            return -EIO;
-        }
-        // 更新文件列表
-        s_instance->getFileList() = s_instance->m_storeManager->getFlatFileList();
-        return 0;
+        return -EACCES;
     }
 
     // 如果是本源文件，删除本源文件
@@ -431,12 +352,6 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
         return -ENOENT;
     }
 
-    // 不允许重命名为已存在的文件
-    QString realToPath = s_instance->getFileList().value(toPathStr);
-    if (!realToPath.isEmpty()) {
-        return -EEXIST;
-    }
-
     // 判断是本源文件还是备份文件
     if (s_instance->m_storeManager->isBackupFile(fromPathStr)) {
         // 重命名备份文件
@@ -454,27 +369,37 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
             // 不允许将备份文件重命名为本源文件名
             return -EACCES;
         }
-        
+
         // 获取备份信息
-        SourceInfo sourceInfo = s_instance->m_storeManager->getSource(fromSourceName);
-        if (sourceInfo.name.isEmpty()) {
+        SourceInfo fromSourceInfo = s_instance->m_storeManager->getSource(fromSourceName);
+        SourceInfo toSourceInfo = s_instance->m_storeManager->getSource(toSourceName);
+        if (fromSourceInfo.name.isEmpty() || toSourceInfo.name.isEmpty()) {
             return -ENOENT;
         }
 
         // 从虚拟名中提取备份名
         // fromPathStr 格式为 "备份名 - 本源名"
         QString fromBackupName = fromPathStr.left(fromPathStr.indexOf(" - "));
-        QString toBackupName = toPathStr.left(toPathStr.indexOf(" - "));
+        QString fromBackupPath = fromSourceInfo.backupsPath + "/" + fromBackupName;
 
-        QString fromBackupPath = sourceInfo.backupsPath + "/" + fromBackupName;
-        QString toBackupPath = sourceInfo.backupsPath + "/" + toBackupName;
-
-        // 重命名备份文件
         QFile backupFile(fromBackupPath);
-        if (!backupFile.rename(toBackupPath)) {
-            return -EIO;
-        }
+        if (fromSourceName == toSourceName) {
+            // 同一个本源文件，只需要重命名备份文件
+            QString toBackupName = toPathStr.left(toPathStr.indexOf(" - "));
+            QString toBackupPath = toSourceInfo.backupsPath + "/" + toBackupName;
 
+            // 重命名备份文件
+            QFile::remove(toBackupPath);
+            if (!backupFile.rename(toBackupPath)) {
+                return -EIO;
+            }
+        } else {
+            // 不同的本源文件，覆盖到其本源文件
+            QFile::remove(toSourceInfo.currentPath);
+            if (!backupFile.rename(toSourceInfo.currentPath)) {
+                return -EIO;
+            }
+        }
     } else {
         // 重命名本源文件
         // 获取本源信息
@@ -502,76 +427,4 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
     // 更新文件列表
     s_instance->getFileList() = s_instance->m_storeManager->getFlatFileList();
     return 0;
-}
-
-// FUSE 操作结构体（按 fuse_operations 定义顺序）
-static struct fuse_operations clericFuseOps = {
-    .getattr = ClericumFuse::fuseGetattr,
-    .unlink = ClericumFuse::fuseUnlink,
-    .rename = ClericumFuse::fuseRename,
-    .open = ClericumFuse::fuseOpen,
-    .read = ClericumFuse::fuseRead,
-    .write = ClericumFuse::fuseWrite,
-    .readdir = ClericumFuse::fuseReaddir,
-    .access = ClericumFuse::fuseAccess,
-    .create = ClericumFuse::fuseCreate,
-};
-
-bool ClericumFuse::mount() {
-    if (m_status == MountStatus::Mounted) {
-        qWarning() << "Already mounted";
-        return false;
-    }
-
-    if (m_storeManager->storePath().isEmpty()) {
-        qWarning() << "Store path not set";
-        return false;
-    }
-
-    if (m_mountPath.isEmpty()) {
-        qWarning() << "Mount path not set";
-        return false;
-    }
-
-    if (!m_storeManager->isValidStore()) {
-        qWarning() << "Invalid store:" << m_storeManager->storePath();
-        return false;
-    }
-
-    // 创建挂载点目录
-    QDir mountDir(m_mountPath);
-    if (!mountDir.exists()) {
-        if (!mountDir.mkpath(".")) {
-            qWarning() << "Failed to create mount directory:" << m_mountPath;
-            return false;
-        }
-    }
-
-    m_status = MountStatus::Mounting;
-    QCoreApplication::processEvents();
-
-    // 刷新文件列表
-    getFileList() = m_storeManager->getFlatFileList();
-
-    // FUSE 参数 - 不使用调试模式 (-d)，fuse_main 会自动后台运行
-    QByteArray mountPointBytes = m_mountPath.toUtf8();
-    char* args[] = {
-        const_cast<char*>(_PROJECT_NAME),
-        mountPointBytes.data(),  // 挂载点
-    };
-    int argc = 2;
-
-    // 在当前线程运行 FUSE 主循环
-    // 不使用 -d 参数时，fuse_main 会自动 daemonize 并在后台运行
-    int ret = fuse_main(argc, args, &clericFuseOps, nullptr);
-
-    m_status = MountStatus::NotMounted;
-
-    if (ret != 0) {
-        qWarning() << "FUSE exited with code:" << ret;
-        return false;
-    }
-
-    emit unmounted();
-    return true;
 }

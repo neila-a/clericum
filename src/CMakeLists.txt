@@ -7,7 +7,8 @@ qt_standard_project_setup(REQUIRES 6.10)
 qt_add_executable(${GLOBAL_PROJECT_NAME}_app
     main.cpp
     storemanager.cpp
-    clericumsfuse.cpp
+    clericumfuse.cpp
+    clericumfuse_operations.cpp
     commandhandler.cpp
 )
 

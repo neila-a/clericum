@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "clericumsfuse.h"
+#include "clericumfuse.h"
 
 #include <QObject>
 #include <QString>

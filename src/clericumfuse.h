@@ -1,5 +1,5 @@
 /**
- * @file clericumsfuse.h
+ * @file clericumfuse.h
  * @brief ClericumFuse 类声明
  *
  * ClericumFuse 实现了一个 FUSE 文件系统，用于：
