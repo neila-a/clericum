@@ -62,19 +62,19 @@ bool StoreManager::create(const QString& path) {
 }
 
 bool StoreManager::isValidStore(const QString& path) const {
-    QFileInfo info(path);
+    const QFileInfo info(path);
     if (!info.exists() || !info.isDir()) {
         return false;
     }
 
-    QFileInfo metaFile(path + "/" + METADATA_FILENAME);
+    const QFileInfo metaFile(path + "/" + METADATA_FILENAME);
     if (!metaFile.exists() || !metaFile.isFile()) {
         return false;
     }
 
     // 检查 files 和 backups 子目录是否存在
-    QFileInfo filesDir(path + "/" + FILES_DIRNAME);
-    QFileInfo backupsDir(path + "/" + BACKUPS_DIRNAME);
+    const QFileInfo filesDir(path + "/" + FILES_DIRNAME);
+    const QFileInfo backupsDir(path + "/" + BACKUPS_DIRNAME);
     return filesDir.exists() && filesDir.isDir() &&
            backupsDir.exists() && backupsDir.isDir();
 }
@@ -109,7 +109,7 @@ QMap<QString, SourceInfo> StoreManager::scanSources() const {
         sourceInfo.backupsPath = m_storePath + "/" + BACKUPS_DIRNAME + "/" + entry;
 
         // 扫描备份文件
-        QDir backupsDir(sourceInfo.backupsPath);
+        const QDir backupsDir(sourceInfo.backupsPath);
         if (backupsDir.exists()) {
             const auto backupEntries = backupsDir.entryList(QDir::Files);
             for (const QString& backupEntry : backupEntries) {
@@ -140,9 +140,9 @@ QString StoreManager::getCurrentPath(const QString& name) const {
 }
 
 bool StoreManager::createSource(const QString& name) {
-    QString filesDirPath = m_storePath + "/" + FILES_DIRNAME;
-    QString filePath = filesDirPath + "/" + name;
-    QString backupsDirPath = m_storePath + "/" + BACKUPS_DIRNAME + "/" + name;
+    const QString filesDirPath = m_storePath + "/" + FILES_DIRNAME;
+    const QString filePath = filesDirPath + "/" + name;
+    const QString backupsDirPath = m_storePath + "/" + BACKUPS_DIRNAME + "/" + name;
 
     // 确保 files 目录存在
     QDir dir;
@@ -179,7 +179,7 @@ bool StoreManager::createBackup(const QString& sourceName, const QString& backup
     QDir dir;
     dir.mkpath(sourceInfo.backupsPath);
 
-    QString backupPath = sourceInfo.backupsPath + "/" + backupName;
+    const QString backupPath = sourceInfo.backupsPath + "/" + backupName;
 
     // 复制 current 文件到备份
     if (!QFile::copy(sourceInfo.currentPath, backupPath)) {
@@ -259,7 +259,7 @@ QMap<QString, QString> StoreManager::getFlatFileList() const {
 
         // 添加备份文件（命名为 "备份名 - 本源名"）
         for (const BackupInfo& backup : sourceInfo.backups) {
-            QString virtualName = backup.name + " - " + sourceInfo.name;
+            const QString virtualName = backup.name + " - " + sourceInfo.name;
             result.insert(virtualName, backup.fullPath);
         }
     }
@@ -277,10 +277,10 @@ bool StoreManager::parseVirtualName(const QString& virtualName,
     QString longestMatch;
 
     for (const QString& sourceName : sourceNames) {
-        QString prefix = " - " + sourceName;
+        const QString prefix = " - " + sourceName;
         if (virtualName.endsWith(prefix)) {
             // 检查这个前缀是否是有效的（即前面的部分是备份名）
-            QString backupName = virtualName.left(virtualName.length() - prefix.length());
+            const QString backupName = virtualName.left(virtualName.length() - prefix.length());
             if (!backupName.isEmpty() && !backupName.contains(" - ")) {
                 // 找到一个匹配
                 if (prefix.length() > longestMatch.length()) {

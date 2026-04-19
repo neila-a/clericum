@@ -24,7 +24,7 @@ CommandHandler::Result CommandHandler::executeCreate(const QString& path) {
         return Result::fail("Invalid path", "Path contains invalid characters");
     }
 
-    QFileInfo info(path);
+    const QFileInfo info(path);
     if (info.exists()) {
         return Result::fail("Path already exists", path);
     }
@@ -34,7 +34,7 @@ CommandHandler::Result CommandHandler::executeCreate(const QString& path) {
         return Result::fail("Failed to create store", path);
     }
 
-    QString msg = QString("Store created at: %1").arg(path);
+    const QString msg = QString("Store created at: %1").arg(path);
     emit commandFinished(true, msg);
     return Result::ok(msg);
 }
@@ -47,7 +47,7 @@ CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     }
 
     // 验证 store 路径
-    QFileInfo storeInfo(storePath);
+    const QFileInfo storeInfo(storePath);
     if (!storeInfo.exists() || !storeInfo.isDir()) {
         return Result::fail("Invalid store path", storePath);
     }
@@ -81,7 +81,7 @@ CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     // 直接挂载
     fuse->mount();
 
-    QString msg = QString("Mounted %1 at %2").arg(storePath, mountPath);
+    const QString msg = QString("Mounted %1 at %2").arg(storePath, mountPath);
     emit commandFinished(true, msg);
     emit mounted(mountPath);
 
@@ -98,7 +98,7 @@ CommandHandler::Result CommandHandler::executeUnload(const QString& mountPath) {
 CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     const QString& backupName) {
     // 提取文件名
-    QString fileName = extractFileName(virtualPath);
+    const QString fileName = extractFileName(virtualPath);
 
     // 查找挂载点
     MountInfo mountInfo = findMountPoint(virtualPath);
@@ -113,7 +113,7 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     }
 
     // 解析本源文件名
-    QString sourceName = extractSourceName(fileName);
+    const QString sourceName = extractSourceName(fileName);
 
     // 检查本源文件是否存在
     StoreManager storeManager;
@@ -136,7 +136,7 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
         return Result::fail("Failed to create backup");
     }
 
-    QString msg = QString("Backup '%1' created for '%2'")
+    const QString msg = QString("Backup '%1' created for '%2'")
         .arg(backupName, sourceName);
     emit commandFinished(true, msg);
 
@@ -146,7 +146,7 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
 CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualPath,
     const QString& backupName) {
     // 提取文件名
-    QString fileName = extractFileName(virtualPath);
+    const QString fileName = extractFileName(virtualPath);
 
     // 查找挂载点
     MountInfo mountInfo = findMountPoint(virtualPath);
@@ -161,7 +161,7 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualP
     }
 
     // 解析本源文件名
-    QString sourceName = extractSourceName(fileName);
+    const QString sourceName = extractSourceName(fileName);
 
     // 检查本源文件是否存在
     StoreManager storeManager;
@@ -189,7 +189,7 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualP
         return Result::fail("Failed to load backup");
     }
 
-    QString msg = QString("Backup '%1' loaded to '%2'")
+    const QString msg = QString("Backup '%1' loaded to '%2'")
         .arg(backupName, sourceName);
     emit commandFinished(true, msg);
 
@@ -204,7 +204,7 @@ bool CommandHandler::isPathMounted(const QString& path) const {
 CommandHandler::MountInfo CommandHandler::findMountPoint(const QString& path) const {
     // 检查路径中是否存在挂载点标记文件 (.clericum-mount，内容为 store 路径)
     QString checkPath = path;
-    QFileInfo info(checkPath);
+    const QFileInfo info(checkPath);
 
     // 如果是文件而非目录，获取其所在目录
     if (info.isFile()) {
@@ -223,7 +223,7 @@ CommandHandler::MountInfo CommandHandler::findMountPoint(const QString& path) co
                 qWarning() << "Failed to open mount marker file" << file.fileName();
                 return mountInfo;
             }
-            QString content = file.readAll();
+            const QString content = file.readAll();
             file.close();
             mountInfo.storePath = content.trimmed();
         }
@@ -251,14 +251,14 @@ QString CommandHandler::extractFileName(const QString& virtualPath) {
 }
 
 QString CommandHandler::extractSourceName(const QString& virtualPath) {
-    QString fileName = extractFileName(virtualPath);
+    const QString fileName = extractFileName(virtualPath);
 
     // 检查是否是备份文件（backupname-sourcename 格式）
     // 找到最后一个 - 后的部分
     int lastDash = fileName.lastIndexOf('-');
     if (lastDash > 0) {
         // 检查 -后的部分是否是已知的本源文件名
-        QString possibleSource = fileName.mid(lastDash + 1);
+        const QString possibleSource = fileName.mid(lastDash + 1);
 
         // 如果去掉备份名前缀后，剩余部分可能是一个本源文件名
         // 这需要 StoreManager 来验证，但这里做简单检查

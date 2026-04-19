@@ -24,7 +24,7 @@ int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
 
     // 检查是否是挂载点标记文件
     if (pathStr == MOUNT_MARKER_FILE) {
-        QByteArray storePathData = s_instance->storePath().toUtf8();
+        const QByteArray storePathData = s_instance->storePath().toUtf8();
         stbuf->st_mode = S_IFREG | 0444;
         stbuf->st_nlink = 1;
         stbuf->st_size = storePathData.size();
@@ -34,13 +34,13 @@ int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
         return 0;
     }
 
-    QString realPath = s_instance->getFileList().value(pathStr);
+    const QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
     }
 
-    QFileInfo fileInfo(realPath);
+    const QFileInfo fileInfo(realPath);
     if (!fileInfo.exists()) {
         return -ENOENT;
     }
@@ -69,7 +69,7 @@ int ClericumFuse::fuseUnlink(const char* path) {
     }
 
     // 检查文件是否存在
-    QString realPath = s_instance->getFileList().value(pathStr);
+    const QString realPath = s_instance->getFileList().value(pathStr);
     if (realPath.isEmpty()) {
         return -ENOENT;
     }
@@ -80,7 +80,7 @@ int ClericumFuse::fuseUnlink(const char* path) {
     }
 
     // 如果是本源文件，删除本源文件
-    QString sourceName = pathStr;
+    const QString sourceName = pathStr;
     SourceInfo sourceInfo = s_instance->m_storeManager->getSource(sourceName);
     if (sourceInfo.name.isEmpty()) {
         return -ENOENT;
@@ -117,13 +117,13 @@ int ClericumFuse::fuseAccess(const char* path, int mask) {
         return 0;  // 标记文件只读
     }
 
-    QString realPath = s_instance->getFileList().value(pathStr);
+    const QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
     }
 
-    QFileInfo fileInfo(realPath);
+    const QFileInfo fileInfo(realPath);
     if (!fileInfo.exists()) {
         return -ENOENT;
     }
@@ -144,7 +144,7 @@ int ClericumFuse::fuseReaddir(const char* path, void* buf,
         return -ENOENT;
     }
 
-    QString pathStr = QString::fromUtf8(path);
+    const QString pathStr = QString::fromUtf8(path);
 
     // 只处理根目录
     if (pathStr != "/") {
@@ -183,7 +183,7 @@ int ClericumFuse::fuseOpen(const char* path, struct fuse_file_info* fi) {
         return 0;
     }
 
-    QString realPath = s_instance->getFileList().value(pathStr);
+    const QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
@@ -205,7 +205,7 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
 
     // 检查是否是挂载点标记文件
     if (pathStr == MOUNT_MARKER_FILE) {
-        QByteArray storePathData = s_instance->storePath().toUtf8();
+        const QByteArray storePathData = s_instance->storePath().toUtf8();
         if (offset < storePathData.size()) {
             int avail = storePathData.size() - static_cast<int>(offset);
             if (static_cast<int>(size) < avail) {
@@ -217,7 +217,7 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
         return 0;
     }
 
-    QString realPath = s_instance->getFileList().value(pathStr);
+    const QString realPath = s_instance->getFileList().value(pathStr);
 
     if (realPath.isEmpty()) {
         return -ENOENT;
@@ -303,20 +303,20 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
     }
 
     // 创建本源文件
-    QString sourceName = pathStr;
+    const QString sourceName = pathStr;
 
     // 确保本源文件条目存在
     if (!s_instance->m_storeManager->sourceExists(sourceName)) {
         // 确保 files 目录存在
         QDir dir;
-        QString filesDir = s_instance->m_storeManager->storePath() + "/" + StoreManager::FILES_DIRNAME;
+        const QString filesDir = s_instance->m_storeManager->storePath() + "/" + StoreManager::FILES_DIRNAME;
         if (!dir.exists(filesDir)) {
             dir.mkpath(filesDir);
         }
         s_instance->m_storeManager->createSource(sourceName);
     }
 
-    QString realPath = s_instance->m_storeManager->getCurrentPath(sourceName);
+    const QString realPath = s_instance->m_storeManager->getCurrentPath(sourceName);
 
     // 创建空文件
     QFile file(realPath);
@@ -338,8 +338,8 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
         return -ENOENT;
     }
 
-    QString fromPathStr = QString::fromUtf8(from).mid(1);  // 移除前导 /
-    QString toPathStr = QString::fromUtf8(to).mid(1);     // 移除前导 /
+    const QString fromPathStr = QString::fromUtf8(from).mid(1);  // 移除前导 /
+    const QString toPathStr = QString::fromUtf8(to).mid(1);     // 移除前导 /
 
     // 不允许重命名挂载点标记文件
     if (fromPathStr == MOUNT_MARKER_FILE || toPathStr == MOUNT_MARKER_FILE) {
@@ -347,7 +347,7 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
     }
 
     // 检查源文件是否存在
-    QString realFromPath = s_instance->getFileList().value(fromPathStr);
+    const QString realFromPath = s_instance->getFileList().value(fromPathStr);
     if (realFromPath.isEmpty()) {
         return -ENOENT;
     }
@@ -379,14 +379,14 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
 
         // 从虚拟名中提取备份名
         // fromPathStr 格式为 "备份名 - 本源名"
-        QString fromBackupName = fromPathStr.left(fromPathStr.indexOf(" - "));
-        QString fromBackupPath = fromSourceInfo.backupsPath + "/" + fromBackupName;
+        const QString fromBackupName = fromPathStr.left(fromPathStr.indexOf(" - "));
+        const QString fromBackupPath = fromSourceInfo.backupsPath + "/" + fromBackupName;
 
         QFile backupFile(fromBackupPath);
         if (fromSourceName == toSourceName) {
             // 同一个本源文件，只需要重命名备份文件
-            QString toBackupName = toPathStr.left(toPathStr.indexOf(" - "));
-            QString toBackupPath = toSourceInfo.backupsPath + "/" + toBackupName;
+            const QString toBackupName = toPathStr.left(toPathStr.indexOf(" - "));
+            const QString toBackupPath = toSourceInfo.backupsPath + "/" + toBackupName;
 
             // 重命名备份文件
             QFile::remove(toBackupPath);
@@ -420,7 +420,7 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
             }
         } else {
             // 重命名本源文件（files/下的文件）
-            QString newCurrentPath = s_instance->m_storeManager->storePath() + "/" +
+            const QString newCurrentPath = s_instance->m_storeManager->storePath() + "/" +
                 StoreManager::FILES_DIRNAME + "/" + toPathStr;
             if (!sourceFile.rename(newCurrentPath)) {
                 return -EIO;
