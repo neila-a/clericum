@@ -407,20 +407,24 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
         if (sourceInfo.name.isEmpty()) {
             return -ENOENT;
         }
+        QFile sourceFile(sourceInfo.currentPath);
 
-        // 不允许重命名为备份文件名格式
         QString dummySourceName;
         bool dummyIsBackup;
         if (s_instance->m_storeManager->parseVirtualName(toPathStr, dummySourceName, dummyIsBackup) && dummyIsBackup) {
-            return -EACCES;
-        }
-
-        // 重命名本源文件（files/下的文件）
-        QFile sourceFile(sourceInfo.currentPath);
-        QString newCurrentPath = s_instance->m_storeManager->storePath() + "/" +
-            StoreManager::FILES_DIRNAME + "/" + toPathStr;
-        if (!sourceFile.rename(newCurrentPath)) {
-            return -EIO;
+            // 重命名为备份文件名格式则重定向到覆盖其本源文件
+            SourceInfo toSourceInfo = s_instance->m_storeManager->getSource(dummySourceName);
+            QFile::remove(toSourceInfo.currentPath);
+            if (!sourceFile.rename(toSourceInfo.currentPath)) {
+                return -EIO;
+            }
+        } else {
+            // 重命名本源文件（files/下的文件）
+            QString newCurrentPath = s_instance->m_storeManager->storePath() + "/" +
+                StoreManager::FILES_DIRNAME + "/" + toPathStr;
+            if (!sourceFile.rename(newCurrentPath)) {
+                return -EIO;
+            }
         }
     }
 
