@@ -198,21 +198,6 @@ public:
     static int fuseRename(const char* from, const char* to, unsigned int flags);
 
 signals:
-    /**
-     * @brief 挂载状态改变信号
-     * @param status 新状态
-     */
-    void statusChanged(MountStatus status);
-
-    /**
-     * @brief 挂载成功信号
-     */
-    void mounted();
-
-    /**
-     * @brief 卸载完成信号
-     */
-    void unmounted();
 
     /**
      * @brief 错误信号

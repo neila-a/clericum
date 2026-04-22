@@ -35,7 +35,6 @@ CommandHandler::Result CommandHandler::executeCreate(const QString& path) {
     }
 
     const QString msg = QString("Store created at: %1").arg(path);
-    emit commandFinished(true, msg);
     return Result::ok(msg);
 }
 
@@ -82,8 +81,6 @@ CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     fuse->mount();
 
     const QString msg = QString("Mounted %1 at %2").arg(storePath, mountPath);
-    emit commandFinished(true, msg);
-    emit mounted(mountPath);
 
     return Result::ok(msg);
 }
@@ -138,7 +135,6 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
 
     const QString msg = QString("Backup '%1' created for '%2'")
         .arg(backupName, sourceName);
-    emit commandFinished(true, msg);
 
     return Result::ok(msg);
 }
@@ -191,7 +187,6 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualP
 
     const QString msg = QString("Backup '%1' loaded to '%2'")
         .arg(backupName, sourceName);
-    emit commandFinished(true, msg);
 
     return Result::ok(msg);
 }

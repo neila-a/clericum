@@ -121,16 +121,14 @@ bool ClericumFuse::mount() {
     getFileList() = m_storeManager->getFlatFileList();
 
     // FUSE 参数 - 不使用调试模式 (-d)，fuse_main 会自动后台运行
-    QByteArray mountPointBytes = m_mountPath.toUtf8();
-    char* args[] = {
-        const_cast<char*>(_PROJECT_NAME),
-        mountPointBytes.data(),  // 挂载点
-    };
-    int argc = 2;
+    struct fuse_args args = FUSE_ARGS_INIT(0, NULL);
+    fuse_opt_add_arg(&args, _PROJECT_NAME);
+    fuse_opt_add_arg(&args,  m_mountPath.toStdString().c_str());
+    //fuse_opt_add_arg(&args, (QStringLiteral("-ostore=") + m_storeManager->storePath()).toStdString().c_str());
 
     // 在当前线程运行 FUSE 主循环
     // 不使用 -d 参数时，fuse_main 会自动 daemonize 并在后台运行
-    int ret = fuse_main(argc, args, &clericFuseOps, nullptr);
+    int ret = fuse_main(args.argc, args.argv, &clericFuseOps, nullptr);
 
     m_status = MountStatus::NotMounted;
 
@@ -139,6 +137,5 @@ bool ClericumFuse::mount() {
         return false;
     }
 
-    emit unmounted();
     return true;
 }

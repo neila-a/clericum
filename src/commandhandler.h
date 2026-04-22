@@ -196,23 +196,4 @@ public:
      */
     static bool validatePath(const QString& path);
 
-signals:
-    /**
-     * @brief 命令执行完成信号
-     * @param success 是否成功
-     * @param message 结果消息
-     */
-    void commandFinished(bool success, const QString& message);
-
-    /**
-     * @brief 挂载完成信号
-     * @param mountPath 挂载点路径
-     */
-    void mounted(const QString& mountPath);
-
-    /**
-     * @brief 卸载完成信号
-     * @param mountPath 挂载点路径
-     */
-    void unmounted(const QString& mountPath);
 };
