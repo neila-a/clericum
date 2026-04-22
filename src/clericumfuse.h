@@ -58,17 +58,6 @@ class ClericumFuse : public QObject {
     Q_OBJECT
 
 public:
-    /**
-     * @brief 挂载状态枚举
-     */
-    enum class MountStatus {
-        NotMounted,    ///< 未挂载
-        Mounting,      ///< 正在挂载
-        Mounted,       ///< 已挂载
-        Unmounting,    ///< 正在卸载
-        Error          ///< 错误
-    };
-    Q_ENUM(MountStatus);
 
     /**
      * @brief 构造函数
@@ -106,42 +95,10 @@ public:
     QString mountPath() const;
 
     /**
-     * @brief 获取当前挂载状态
-     * @return 挂载状态
-     */
-    MountStatus status() const;
-
-    /**
      * @brief 挂载文件系统
      * @return 是否成功
      */
     bool mount();
-
-    /**
-     * @brief 获取文件名列表
-     * @return 虚拟文件名列表
-     */
-    QStringList fileNames() const;
-
-    /**
-     * @brief 根据虚拟文件名获取真实路径
-     * @param name 虚拟文件名
-     * @return 真实文件路径
-     */
-    QString resolvePath(const QString& name) const;
-
-    /**
-     * @brief 检查是否为备份文件
-     * @param name 虚拟文件名
-     * @return 是否为备份文件
-     */
-    bool isBackupFile(const QString& name) const;
-
-    /**
-     * @brief 获取底层 StoreManager
-     * @return StoreManager 指针
-     */
-    QSharedPointer<StoreManager> storeManager() const;
 
     // ============== FUSE 回调函数 ==============
     // 这些函数会被 FUSE 库调用
@@ -214,5 +171,4 @@ private:
 
     QSharedPointer<StoreManager> m_storeManager;  ///< Store 管理器
     QString m_mountPath;                          ///< 挂载点路径
-    MountStatus m_status = MountStatus::NotMounted;  ///< 挂载状态
 };

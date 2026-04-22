@@ -14,7 +14,7 @@
 #include <QString>
 #include <QDir>
 #include <QFileInfo>
-#include <QVector>
+#include <QList>
 #include <QMap>
 #include <QSharedPointer>
 #include <QFile>
@@ -35,7 +35,7 @@ struct SourceInfo {
     QString name;           ///< 本源文件名
     QString currentPath;    ///< 本源文件路径（files/下的文件）
     QString backupsPath;    ///< backups/本源名 文件夹路径
-    QVector<BackupInfo> backups;  ///< 备份列表
+    QList<BackupInfo> backups;  ///< 备份列表
 };
 
 /**
@@ -145,7 +145,7 @@ public:
      * 扫描 store 文件夹，返回所有本源文件的信息。
      * 每个 SourceInfo 包含本源文件名、所有备份文件信息等。
      */
-    QVector<SourceInfo> getAllSources() const;
+    QList<SourceInfo> getAllSources() const;
 
     /**
      * @brief 根据文件名获取本源文件信息

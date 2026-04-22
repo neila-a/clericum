@@ -51,26 +51,6 @@ QString ClericumFuse::mountPath() const {
     return m_mountPath;
 }
 
-ClericumFuse::MountStatus ClericumFuse::status() const {
-    return m_status;
-}
-
-QStringList ClericumFuse::fileNames() const {
-    return getFileList().keys();
-}
-
-QString ClericumFuse::resolvePath(const QString& name) const {
-    return getFileList().value(name, QString());
-}
-
-bool ClericumFuse::isBackupFile(const QString& name) const {
-    return m_storeManager->isBackupFile(name);
-}
-
-QSharedPointer<StoreManager> ClericumFuse::storeManager() const {
-    return m_storeManager;
-}
-
 // FUSE 操作结构体（按 fuse_operations 定义顺序）
 static struct fuse_operations clericFuseOps = {
     .getattr = ClericumFuse::fuseGetattr,
@@ -85,11 +65,6 @@ static struct fuse_operations clericFuseOps = {
 };
 
 bool ClericumFuse::mount() {
-    if (m_status == MountStatus::Mounted) {
-        qWarning() << "Already mounted";
-        return false;
-    }
-
     if (m_storeManager->storePath().isEmpty()) {
         qWarning() << "Store path not set";
         return false;
@@ -114,7 +89,6 @@ bool ClericumFuse::mount() {
         }
     }
 
-    m_status = MountStatus::Mounting;
     QCoreApplication::processEvents();
 
     // 刷新文件列表
@@ -129,8 +103,6 @@ bool ClericumFuse::mount() {
     // 在当前线程运行 FUSE 主循环
     // 不使用 -d 参数时，fuse_main 会自动 daemonize 并在后台运行
     int ret = fuse_main(args.argc, args.argv, &clericFuseOps, nullptr);
-
-    m_status = MountStatus::NotMounted;
 
     if (ret != 0) {
         qWarning() << "FUSE exited with code:" << ret;

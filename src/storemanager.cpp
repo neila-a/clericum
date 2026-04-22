@@ -126,8 +126,8 @@ QMap<QString, SourceInfo> StoreManager::scanSources() const {
     return result;
 }
 
-QVector<SourceInfo> StoreManager::getAllSources() const {
-    return QVector<SourceInfo>::fromList(scanSources().values());
+QList<SourceInfo> StoreManager::getAllSources() const {
+    return scanSources().values();
 }
 
 SourceInfo StoreManager::getSource(const QString& name) const {
