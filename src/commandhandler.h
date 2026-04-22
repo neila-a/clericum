@@ -31,26 +31,26 @@
  * ### 命令使用示例 ###
  *
  * #### store create 命令 ####
- * @code
+ * ```cpp
  * CommandHandler handler;
  * handler.executeCreate("/path/to/store");
- * @endcode
+ * ```
  *
  * #### store load 命令 ####
- * @code
+ * ```cpp
  * CommandHandler handler;
  * handler.executeLoad("/path/to/store", "/path/to/mount");
- * @endcode
+ * ```
  *
  * #### backup create 命令 ####
- * @code
+ * ```cpp
  * handler.executeBackup("/path/to/mount/file", "backup-name");
- * @endcode
+ * ```
  *
  * #### backup load 命令 ####
- * @code
+ * ```cpp
  * handler.executeBackupLoad("/path/to/mount/file", "backup-name");
- * @endcode
+ * ```
  */
 class CommandHandler : public QObject {
     Q_OBJECT

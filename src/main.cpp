@@ -19,7 +19,7 @@
  *
  * @section structure Store 结构
  *
- * @code
+ * ```
  * store/
  * ├── .clericum-store   # 标记
  * ├── files/
@@ -30,9 +30,9 @@
  *     │   └── backup1
  *     └── filename2/
  *         └── backup3
- * @endcode
+ * ```
  *
- * @author Clericum Team
+ * @author Neila
  * @version _PROJECT_VERSION
  */
 

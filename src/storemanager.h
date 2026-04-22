@@ -48,7 +48,7 @@ struct SourceInfo {
  * - 验证 store 文件夹的有效性
  *
  * ### Store 文件夹结构 ###
- * @code
+ * ```
  * store/
  * ├── .clericum-store   # 标记文件
  * ├── files/
@@ -60,10 +60,10 @@ struct SourceInfo {
  *     │   └── backup2
  *     └── filename2/
  *         └── backup3
- * @endcode
+ * ```
  *
  * ### 使用示例 ###
- * @code
+ * ```cpp
  * StoreManager manager;
  * if (manager.create("/path/to/store")) {
  *     qDebug() << "Store created successfully";
@@ -71,7 +71,7 @@ struct SourceInfo {
  *
  * manager.setStorePath("/path/to/store");
  * auto sources = manager.getAllSources();
- * @endcode
+ * ```
  */
 class StoreManager : public QObject {
     Q_OBJECT
@@ -116,12 +116,12 @@ public:
      * - 元数据文件 (.clericum)
      * - 初始的空结构
      *
-     * @code
+     * ```cpp
      * StoreManager manager;
      * if (manager.create("/home/user/my-store")) {
      *     qDebug() << "Created successfully";
      * }
-     * @endcode
+     * ```
      */
     bool create(const QString& path);
 

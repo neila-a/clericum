@@ -35,24 +35,24 @@ static const char* MOUNT_MARKER_FILE = ".clericum-mount";
  * - 对备份文件的写入操作会被重定向到本源文件的 current 文件
  *
  * ### 虚拟文件系统结构 ###
- * @code
+ * ```
  * /mount/path/
  * ├── .clericum-mount          # 挂载点标记文件（内容为 store 路径）
  * ├── file1                    # 本源文件1的 current
  * ├── file2                    # 本源文件2的 current
  * ├── backup1-file1           # 本源文件1的 backup1 备份
  * └── backup2-file1           # 本源文件1的 backup2 备份
- * @endcode
+ * ```
  *
  * ### 使用示例 ###
- * @code
+ * ```cpp
  * ClericumFuse fuse;
  * fuse.setStorePath("/path/to/store");
  * fuse.setMountPath("/path/to/mount");
  *
  * // 在另一个线程中运行
  * fuse.mount();
- * @endcode
+ * ```
  */
 class ClericumFuse : public QObject {
     Q_OBJECT
