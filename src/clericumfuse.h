@@ -13,12 +13,6 @@
 
 #include "storemanager.h"
 
-#include <QObject>
-#include <QString>
-#include <QMap>
-#include <QSharedPointer>
-#include <QDir>
-
 #define FUSE_USE_VERSION 30
 #include <fuse3/fuse.h>
 
@@ -55,7 +49,10 @@ static const char* MOUNT_MARKER_FILE = ".clericum-mount";
  * ```
  */
 class ClericumFuse : public QObject {
-    Q_OBJECT
+
+    Q_OBJECT;
+    Q_PROPERTY(QString storePath READ storePath WRITE setStorePath);
+    Q_PROPERTY(QString mountPath READ mountPath WRITE setMountPath);
 
 public:
 

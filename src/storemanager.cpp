@@ -4,10 +4,6 @@
  */
 
 #include "storemanager.h"
-#include <QDir>
-#include <QFile>
-#include <QTextStream>
-#include <QDebug>
 
 StoreManager::StoreManager(QObject* parent)
     : QObject{ parent } {

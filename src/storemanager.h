@@ -10,14 +10,7 @@
 
 #pragma once
 
-#include <QObject>
-#include <QString>
 #include <QDir>
-#include <QFileInfo>
-#include <QList>
-#include <QMap>
-#include <QSharedPointer>
-#include <QFile>
 
  /**
   * @brief 备份文件信息结构
@@ -74,7 +67,9 @@ struct SourceInfo {
  * ```
  */
 class StoreManager : public QObject {
-    Q_OBJECT
+
+    Q_OBJECT;
+    Q_PROPERTY(QString storePath READ storePath WRITE setStorePath);
 
 public:
     /** @brief 标记文件名 */

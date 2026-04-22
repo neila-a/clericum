@@ -36,13 +36,8 @@
  * @version _PROJECT_VERSION
  */
 
-#include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QCommandLineOption>
-#include <QDebug>
-#include <QTimer>
 #include <csignal>
-#include <unistd.h>
 
 #include <KAboutData>
 

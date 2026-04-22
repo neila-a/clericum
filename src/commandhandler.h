@@ -13,10 +13,6 @@
 
 #include "clericumfuse.h"
 
-#include <QObject>
-#include <QString>
-#include <QMap>
-
 /**
  * @class CommandHandler
  * @brief 命令处理器类

@@ -4,13 +4,7 @@
  */
 
 #include "commandhandler.h"
-
-#include <QDir>
-#include <QFileInfo>
-#include <QDebug>
 #include <QProcess>
-#include <QCoreApplication>
-#include <QFile>
 
 CommandHandler::CommandHandler(QObject* parent)
     : QObject{ parent } {

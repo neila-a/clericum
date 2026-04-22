@@ -5,23 +5,6 @@
 
 #include "clericumfuse.h"
 
-#include <QCoreApplication>
-#include <QDebug>
-#include <QFile>
-#include <QFileInfo>
-#include <QDateTime>
-#include <QProcess>
-#include <cerrno>
-#include <cstring>
-#include <memory>
-#include <signal.h>
-#include <sys/types.h>
-#include <unistd.h>
-
- // FUSE 3 API
-#define FUSE_USE_VERSION 30
-#include <fuse3/fuse.h>
-
 // 静态成员初始化
 ClericumFuse* ClericumFuse::s_instance = nullptr;
 
@@ -88,8 +71,6 @@ bool ClericumFuse::mount() {
             return false;
         }
     }
-
-    QCoreApplication::processEvents();
 
     // 刷新文件列表
     getFileList() = m_storeManager->getFlatFileList();
