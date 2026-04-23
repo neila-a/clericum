@@ -35,7 +35,7 @@ QString ClericumFuse::mountPath() const {
 }
 
 // FUSE 操作结构体（按 fuse_operations 定义顺序）
-static struct fuse_operations clericFuseOps = {
+static fuse_operations clericFuseOps = {
     .getattr = ClericumFuse::fuseGetattr,
     .unlink = ClericumFuse::fuseUnlink,
     .rename = ClericumFuse::fuseRename,
@@ -48,7 +48,7 @@ static struct fuse_operations clericFuseOps = {
 };
 
 bool ClericumFuse::mount() {
-    if (m_storeManager->storePath().isEmpty()) {
+    if (storePath().isEmpty()) {
         qWarning() << "Store path not set";
         return false;
     }
@@ -59,7 +59,7 @@ bool ClericumFuse::mount() {
     }
 
     if (!m_storeManager->isValidStore()) {
-        qWarning() << "Invalid store:" << m_storeManager->storePath();
+        qWarning() << "Invalid store:" << storePath();
         return false;
     }
 
@@ -75,11 +75,12 @@ bool ClericumFuse::mount() {
     // 刷新文件列表
     getFileList() = m_storeManager->getFlatFileList();
 
+    qInfo() << QString("Mounted %1 at %2").arg(storePath(), mountPath());
+
     // FUSE 参数 - 不使用调试模式 (-d)，fuse_main 会自动后台运行
     struct fuse_args args = FUSE_ARGS_INIT(0, NULL);
     fuse_opt_add_arg(&args, _PROJECT_NAME);
-    fuse_opt_add_arg(&args,  m_mountPath.toStdString().c_str());
-    //fuse_opt_add_arg(&args, (QStringLiteral("-ostore=") + m_storeManager->storePath()).toStdString().c_str());
+    fuse_opt_add_arg(&args,  m_mountPath.toUtf8().data());
 
     // 在当前线程运行 FUSE 主循环
     // 不使用 -d 参数时，fuse_main 会自动 daemonize 并在后台运行

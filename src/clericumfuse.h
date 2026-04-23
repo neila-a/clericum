@@ -104,7 +104,7 @@ public:
      * @brief 获取文件系统属性
      */
     static int fuseGetattr(const char* path, struct stat* stbuf,
-        struct fuse_file_info* fi);
+        fuse_file_info* fi);
 
     /**
      * @brief 访问文件
@@ -115,31 +115,31 @@ public:
      * @brief 读取目录
      */
     static int fuseReaddir(const char* path, void* buf, fuse_fill_dir_t filler,
-        off_t offset, struct fuse_file_info* fi,
-        enum fuse_readdir_flags flags);
+        off_t offset, fuse_file_info* fi,
+        fuse_readdir_flags flags);
 
     /**
      * @brief 打开文件
      */
-    static int fuseOpen(const char* path, struct fuse_file_info* fi);
+    static int fuseOpen(const char* path, fuse_file_info* fi);
 
     /**
      * @brief 读取文件
      */
     static int fuseRead(const char* path, char* buf, size_t size,
-        off_t offset, struct fuse_file_info* fi);
+        off_t offset, fuse_file_info* fi);
 
     /**
      * @brief 写入文件
      */
     static int fuseWrite(const char* path, const char* buf, size_t size,
-        off_t offset, struct fuse_file_info* fi);
+        off_t offset, fuse_file_info* fi);
 
     /**
      * @brief 创建文件
      */
     static int fuseCreate(const char* path, mode_t mode,
-        struct fuse_file_info* fi);
+        fuse_file_info* fi);
 
     /**
      * @brief 删除文件

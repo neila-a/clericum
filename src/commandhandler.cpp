@@ -74,15 +74,13 @@ CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     // 直接挂载
     fuse->mount();
 
-    const QString msg = QString("Mounted %1 at %2").arg(storePath, mountPath);
-
-    return Result::ok(msg);
+    return Result::fail("Unexpected situation: fuse->mount() didn't daemonize this");
 }
 
 CommandHandler::Result CommandHandler::executeUnload(const QString& mountPath) {
     // 使用 fusermount 卸载
     QProcess proc;
-    proc.start("fusermount", { "-u", mountPath });
+    proc.start("fusermount3", { "-u", mountPath });
     return { proc.waitForFinished() };
 }
 

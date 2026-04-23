@@ -60,19 +60,25 @@ bool StoreManager::create(const QString& path) {
 bool StoreManager::isValidStore(const QString& path) const {
     const QFileInfo info(path);
     if (!info.exists() || !info.isDir()) {
+        qWarning() << "Not a dir";
         return false;
     }
 
     const QFileInfo metaFile(path + "/" + METADATA_FILENAME);
     if (!metaFile.exists() || !metaFile.isFile()) {
+        qWarning() << "No metafile";
         return false;
     }
 
     // 检查 files 和 backups 子目录是否存在
     const QFileInfo filesDir(path + "/" + FILES_DIRNAME);
     const QFileInfo backupsDir(path + "/" + BACKUPS_DIRNAME);
-    return filesDir.exists() && filesDir.isDir() &&
+    bool filesAndBackups = filesDir.exists() && filesDir.isDir() &&
            backupsDir.exists() && backupsDir.isDir();
+    if (!filesAndBackups) {
+        qWarning() << "No or invaild files or backups folder";
+    }
+    return filesAndBackups;
 }
 
 bool StoreManager::isValidStore() const {

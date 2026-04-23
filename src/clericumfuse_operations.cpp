@@ -1,7 +1,7 @@
 #include "clericumfuse.h"
 
 int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
-    struct fuse_file_info* fi) {
+    fuse_file_info* fi) {
     Q_UNUSED(fi);
 
     if (!s_instance) {
@@ -134,8 +134,8 @@ int ClericumFuse::fuseAccess(const char* path, int mask) {
 int ClericumFuse::fuseReaddir(const char* path, void* buf,
     fuse_fill_dir_t filler,
     off_t offset,
-    struct fuse_file_info* fi,
-    enum fuse_readdir_flags flags) {
+    fuse_file_info* fi,
+    fuse_readdir_flags flags) {
     Q_UNUSED(offset);
     Q_UNUSED(fi);
     Q_UNUSED(flags);
@@ -167,7 +167,7 @@ int ClericumFuse::fuseReaddir(const char* path, void* buf,
     return 0;
 }
 
-int ClericumFuse::fuseOpen(const char* path, struct fuse_file_info* fi) {
+int ClericumFuse::fuseOpen(const char* path, fuse_file_info* fi) {
     if (!s_instance) {
         return -ENOENT;
     }
@@ -193,7 +193,7 @@ int ClericumFuse::fuseOpen(const char* path, struct fuse_file_info* fi) {
 }
 
 int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
-    off_t offset, struct fuse_file_info* fi) {
+    off_t offset, fuse_file_info* fi) {
     Q_UNUSED(fi);
 
     if (!s_instance) {
@@ -239,7 +239,7 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
 }
 
 int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
-    off_t offset, struct fuse_file_info* fi) {
+    off_t offset, fuse_file_info* fi) {
     Q_UNUSED(fi);
 
     if (!s_instance) {
@@ -287,7 +287,7 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
 }
 
 int ClericumFuse::fuseCreate(const char* path, mode_t mode,
-    struct fuse_file_info* fi) {
+    fuse_file_info* fi) {
     Q_UNUSED(mode);
 
     if (!s_instance) {
@@ -309,7 +309,7 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
     if (!s_instance->m_storeManager->sourceExists(sourceName)) {
         // 确保 files 目录存在
         QDir dir;
-        const QString filesDir = s_instance->m_storeManager->storePath() + "/" + StoreManager::FILES_DIRNAME;
+        const QString filesDir = s_instance->storePath() + "/" + StoreManager::FILES_DIRNAME;
         if (!dir.exists(filesDir)) {
             dir.mkpath(filesDir);
         }
@@ -420,7 +420,7 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
             }
         } else {
             // 重命名本源文件（files/下的文件）
-            const QString newCurrentPath = s_instance->m_storeManager->storePath() + "/" +
+            const QString newCurrentPath = s_instance->storePath() + "/" +
                 StoreManager::FILES_DIRNAME + "/" + toPathStr;
             if (!sourceFile.rename(newCurrentPath)) {
                 return -EIO;

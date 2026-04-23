@@ -43,15 +43,6 @@
 
 #include "commandhandler.h"
 
- // 全局命令处理器指针，用于信号处理
-static CommandHandler* g_handler = nullptr;
-
-// 信号处理函数
-static void signalHandler(int signum) {
-    qInfo() << "Received signal" << signum << ", shutting down...";
-    QCoreApplication::quit();
-}
-
 /**
  * @brief 主函数
  *
@@ -101,14 +92,8 @@ int main(int argc, char* argv[]) {
 
     // 创建命令处理器
     CommandHandler handler;
-    g_handler = &handler;
-
-    // 设置信号处理
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
 
     CommandHandler::Result result;
-    bool shouldRunEventLoop = false;
 
     if (action == QStringLiteral("gui")) {
         // GUI 模式（暂未实现）
@@ -141,12 +126,6 @@ int main(int argc, char* argv[]) {
             const QString store = arguments.at(2);
             const QString path = arguments.at(3);
             result = handler.executeLoad(store, path);
-
-            // store load 命令需要保持运行
-            if (result.success) {
-                shouldRunEventLoop = true;
-            }
-
         } else if (subaction == QStringLiteral("unload")) {
             if (arguments.length() < 3) {
                 qCritical() << "store unload requires a path argument";
@@ -154,7 +133,6 @@ int main(int argc, char* argv[]) {
             }
             const QString path = arguments.at(2);
             result = handler.executeUnload(path);
-
         } else {
             qCritical() << "Unknown store subcommand:" << subaction;
             parser.showHelp(-1);
@@ -201,10 +179,6 @@ int main(int argc, char* argv[]) {
     if (result.success) {
         if (!result.message.isEmpty()) {
             qInfo() << result.message;
-        }
-        if (shouldRunEventLoop) {
-            // 进入事件循环保持运行
-            return app.exec();
         }
         return 0;
     } else {
