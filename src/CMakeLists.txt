@@ -10,6 +10,7 @@ qt_add_executable(${GLOBAL_PROJECT_NAME}_app
     clericumfuse.cpp
     clericumfuse_operations.cpp
     commandhandler.cpp
+    commandparser.cpp
 )
 
 qt_add_qml_module(${GLOBAL_PROJECT_NAME}_app

@@ -59,7 +59,7 @@ struct SourceInfo {
  * ```cpp
  * StoreManager manager;
  * if (manager.create("/path/to/store")) {
- *     qDebug() << "Store created successfully";
+ *     // Store created successfully
  * }
  *
  * manager.setStorePath("/path/to/store");
@@ -114,7 +114,7 @@ public:
      * ```cpp
      * StoreManager manager;
      * if (manager.create("/home/user/my-store")) {
-     *     qDebug() << "Created successfully";
+     *     // Created successfully
      * }
      * ```
      */

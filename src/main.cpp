@@ -36,18 +36,14 @@
  * @version _PROJECT_VERSION
  */
 
-#include <QCommandLineParser>
-#include <csignal>
-
 #include <KAboutData>
+#include "commandparser.h"
 
-#include "commandhandler.h"
-
-/**
- * @brief 主函数
- *
- * 处理命令行参数并执行相应命令。
- */
+ /**
+  * @brief 主函数
+  *
+  * 处理命令行参数并执行相应命令。
+  */
 int main(int argc, char* argv[]) {
     QCoreApplication app(argc, argv);
 
@@ -65,126 +61,30 @@ int main(int argc, char* argv[]) {
     aboutData.addAuthor("Neila", "any", "neilaspace@outlook.com", "https://neilasite.pages.dev", "https://avatars.githubusercontent.com/u/78797625");
     KAboutData::setApplicationData(aboutData);
 
-    QCommandLineParser parser;
+    CommandParser parser;
     aboutData.setupCommandLine(&parser);
-    parser.setApplicationDescription(aboutData.shortDescription() + "\n"
-        "Commands:\n"
-        "  store create <path>     Create a new store folder\n"
-        "  store load <store> <path>   Mount store to path\n"
-        "  store unload <path>    Unmount filesystem\n"
-        "  backup create <path> <name>  Create backup of file\n"
-        "  backup load <path> <name>   Load a backup file\n"
-        "  gui                   Launch GUI (not implemented)");
 
-    parser.addPositionalArgument("action", "The action to perform: store, backup, or gui");
-    parser.addPositionalArgument("subaction", "Sub action: create, load, unload (for store); create, load (for backup)");
-    parser.addPositionalArgument("args", "Additional arguments");
-
-    parser.process(app);
-
-    const QStringList arguments = parser.positionalArguments();
-    if (arguments.isEmpty()) {
-        parser.showHelp(-1);
-        return -1;
-    }
-
-    const QString action = arguments.first();
-
-    // 创建命令处理器
     CommandHandler handler;
+#define executor(command) [&handler](QStringList arguments){ return command; }
+    parser
 
-    CommandHandler::Result result;
+        // store 相关命令
+        .registerCommand({ "store", "create" }, { "path" }, "Create a new store",
+            executor(handler.executeCreate(arguments[0])))
+        .registerCommand({ "store", "load" }, { "store", "path" }, "Mount a store to path",
+            executor(handler.executeLoad(arguments[0], arguments[1])))
+        .registerCommand({ "store", "unload" }, { "path" }, "Unmount a filesystem",
+            executor(handler.executeUnload(arguments[0])))
 
-    if (action == QStringLiteral("gui")) {
-        // GUI 模式（暂未实现）
-        qCritical() << "GUI mode is not yet implemented";
-        return -1;
+        // backup 相关命令
+        .registerCommand({ "backup", "create" }, { "path", "name" }, "Create backup of file",
+            executor(handler.executeBackup(arguments[0], arguments[1])))
+        .registerCommand({ "backup", "load" }, { "path", "name" }, "Load a backup file",
+            executor(handler.executeBackupLoad(arguments[0], arguments[1])))
 
-    } else if (action == QStringLiteral("store")) {
-        // store create <path>
-        // store load <store> <path>
-        // store unload <path>
-        if (arguments.length() < 2) {
-            qCritical() << "store requires a subcommand (create, load, unload)";
-            parser.showHelp(-1);
-        }
-        const QString subaction = arguments.at(1);
+        ;
+#undef executor
 
-        if (subaction == QStringLiteral("create")) {
-            if (arguments.length() < 3) {
-                qCritical() << "store create requires a path argument";
-                parser.showHelp(-1);
-            }
-            const QString path = arguments.at(2);
-            result = handler.executeCreate(path);
-
-        } else if (subaction == QStringLiteral("load")) {
-            if (arguments.length() < 4) {
-                qCritical() << "store load requires store and path arguments";
-                parser.showHelp(-1);
-            }
-            const QString store = arguments.at(2);
-            const QString path = arguments.at(3);
-            result = handler.executeLoad(store, path);
-        } else if (subaction == QStringLiteral("unload")) {
-            if (arguments.length() < 3) {
-                qCritical() << "store unload requires a path argument";
-                parser.showHelp(-1);
-            }
-            const QString path = arguments.at(2);
-            result = handler.executeUnload(path);
-        } else {
-            qCritical() << "Unknown store subcommand:" << subaction;
-            parser.showHelp(-1);
-        }
-
-    } else if (action == QStringLiteral("backup")) {
-        // backup create <path> <name>
-        // backup load <path> <name>
-        if (arguments.length() < 2) {
-            qCritical() << "backup requires a subcommand (create, load)";
-            parser.showHelp(-1);
-        }
-        const QString subaction = arguments.at(1);
-
-        if (subaction == QStringLiteral("create")) {
-            if (arguments.length() < 4) {
-                qCritical() << "backup create requires path and name arguments";
-                parser.showHelp(-1);
-            }
-            const QString path = arguments.at(2);
-            const QString name = arguments.at(3);
-            result = handler.executeBackup(path, name);
-
-        } else if (subaction == QStringLiteral("load")) {
-            if (arguments.length() < 4) {
-                qCritical() << "backup load requires path and name arguments";
-                parser.showHelp(-1);
-            }
-            const QString path = arguments.at(2);
-            const QString name = arguments.at(3);
-            result = handler.executeBackupLoad(path, name);
-
-        } else {
-            qCritical() << "Unknown backup subcommand:" << subaction;
-            parser.showHelp(-1);
-        }
-
-    } else {
-        qCritical() << "Unknown action:" << action;
-        parser.showHelp(-1);
-    }
-
-    // 输出结果
-    if (result.success) {
-        if (!result.message.isEmpty()) {
-            qInfo() << result.message;
-        }
-        return 0;
-    } else {
-        if (!result.error.isEmpty()) {
-            qCritical() << "Error:" << result.message << result.error;
-        }
-        return -1;
-    }
+    parser.setApplication(aboutData.shortDescription());
+    return parser.process(app);
 }
