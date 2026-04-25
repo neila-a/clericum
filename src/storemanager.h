@@ -12,6 +12,11 @@
 
 #include <QDir>
 
+#define log(type, text, ...) q##type().noquote() << QString(text).arg(__VA_ARGS__)
+#define warn(...) log(Warning, __VA_ARGS__)
+#define information(...) log(Info, __VA_ARGS__)
+#define critical(...) log(Critical, __VA_ARGS__)
+
  /**
   * @brief 备份文件信息结构
   */

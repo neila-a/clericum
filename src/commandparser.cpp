@@ -23,15 +23,13 @@ void CommandParser::setApplication(const QString& description) {
         QStringList arguments = info.arguments;
         // "str" -> "<str>"
         arguments.replaceInStrings(QRegularExpression("(^.*$)"), "<\\1>");
-        commandsDescription += "\n" + name.join(" ") + " " + arguments.join(" ") + "\t" + info.description;
+        commandsDescription.append(QStringLiteral("\n%1 %2\t%3").arg(name.join(" "), arguments.join(" "), info.description));
 
         // 准备 commands
         commands.append(name.join(" "));
     }
-    QCommandLineParser::setApplicationDescription(description + "\n"
-        "Commands: " +
-        commandsDescription);
-    addPositionalArgument("command", "The command to execute: " + commands.join(", "));
+    QCommandLineParser::setApplicationDescription(QStringLiteral("%1\nCommands: %2").arg(description, commandsDescription));
+    addPositionalArgument("command", QStringLiteral("The command to execute: %1").arg(commands.join(", ")));
 }
 
 CommandParser& CommandParser::registerCommand(const QStringList& name, const QStringList& arguments, const QString& description, executor executorFunction) {
@@ -67,7 +65,7 @@ int CommandParser::process(const QCoreApplication& app) {
             const QStringList neededArguments = info.arguments;
 
             if (name.length() + neededArguments.length() > arguments.length()) {
-                qCritical() << name.join(" ") << "requires" << neededArguments.join(", ") << "arguments";
+                critical("%1 requires %2 arguments", name.join(", "), neededArguments.join(", "));
                 showHelp(-1);
             }
 
@@ -80,20 +78,18 @@ int CommandParser::process(const QCoreApplication& app) {
         }
     }
     if (!foundCommand) {
-        qCritical() << "Unknown command: " << arguments.join(" ");
+        critical("Unknown command %1", arguments.join(" "));
         showHelp(-1);
     }
 
     // 输出结果
     if (result.success) {
         if (!result.message.isEmpty()) {
-            qInfo() << result.message;
+            information(result.message, "");
         }
         return 0;
     } else {
-        if (!result.error.isEmpty()) {
-            qCritical() << "Error:" << result.message << result.error;
-        }
+        critical("Error: %1", result.message);
         return -1;
     }
 }

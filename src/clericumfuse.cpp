@@ -5,7 +5,7 @@
 
 #include "clericumfuse.h"
 
-// 静态成员初始化
+ // 静态成员初始化
 ClericumFuse* ClericumFuse::s_instance = nullptr;
 
 ClericumFuse::ClericumFuse(QObject* parent)
@@ -49,17 +49,17 @@ static fuse_operations clericFuseOps = {
 
 bool ClericumFuse::mount() {
     if (storePath().isEmpty()) {
-        qWarning() << "Store path not set";
+        warn("Store path not set", "");
         return false;
     }
 
     if (m_mountPath.isEmpty()) {
-        qWarning() << "Mount path not set";
+        warn("Mount path not set", "");
         return false;
     }
 
     if (!m_storeManager->isValidStore()) {
-        qWarning() << "Invalid store:" << storePath();
+        warn("Invalid store %1", storePath());
         return false;
     }
 
@@ -67,7 +67,7 @@ bool ClericumFuse::mount() {
     QDir mountDir(m_mountPath);
     if (!mountDir.exists()) {
         if (!mountDir.mkpath(".")) {
-            qWarning() << "Failed to create mount directory:" << m_mountPath;
+            warn("Failed to create mount directory %1", m_mountPath);
             return false;
         }
     }
@@ -75,19 +75,19 @@ bool ClericumFuse::mount() {
     // 刷新文件列表
     getFileList() = m_storeManager->getFlatFileList();
 
-    qInfo() << QString("Mounted %1 at %2").arg(storePath(), mountPath());
+    information("Mounted %1 at %2", storePath(), mountPath());
 
     // FUSE 参数 - 不使用调试模式 (-d)，fuse_main 会自动后台运行
     struct fuse_args args = FUSE_ARGS_INIT(0, NULL);
     fuse_opt_add_arg(&args, _PROJECT_NAME);
-    fuse_opt_add_arg(&args,  m_mountPath.toUtf8().data());
+    fuse_opt_add_arg(&args, m_mountPath.toUtf8().data());
 
     // 在当前线程运行 FUSE 主循环
     // 不使用 -d 参数时，fuse_main 会自动 daemonize 并在后台运行
     int ret = fuse_main(args.argc, args.argv, &clericFuseOps, nullptr);
 
     if (ret != 0) {
-        qWarning() << "FUSE exited with code:" << ret;
+        warn("FUSE exited with code %1", ret);
         return false;
     }
 

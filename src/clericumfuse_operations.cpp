@@ -309,7 +309,7 @@ int ClericumFuse::fuseCreate(const char* path, mode_t mode,
     if (!s_instance->m_storeManager->sourceExists(sourceName)) {
         // 确保 files 目录存在
         QDir dir;
-        const QString filesDir = s_instance->storePath() + "/" + StoreManager::FILES_DIRNAME;
+        const QString filesDir = QStringList({ s_instance->storePath(), StoreManager::FILES_DIRNAME }).join("/");
         if (!dir.exists(filesDir)) {
             dir.mkpath(filesDir);
         }
@@ -380,13 +380,13 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
         // 从虚拟名中提取备份名
         // fromPathStr 格式为 "备份名 - 本源名"
         const QString fromBackupName = fromPathStr.left(fromPathStr.indexOf(" - "));
-        const QString fromBackupPath = fromSourceInfo.backupsPath + "/" + fromBackupName;
+        const QString fromBackupPath = QStringList({ fromSourceInfo.backupsPath, fromBackupName }).join("/");
 
         QFile backupFile(fromBackupPath);
         if (fromSourceName == toSourceName) {
             // 同一个本源文件，只需要重命名备份文件
             const QString toBackupName = toPathStr.left(toPathStr.indexOf(" - "));
-            const QString toBackupPath = toSourceInfo.backupsPath + "/" + toBackupName;
+            const QString toBackupPath = QStringList({ toSourceInfo.backupsPath, toBackupName }).join("/");
 
             // 重命名备份文件
             QFile::remove(toBackupPath);
@@ -420,8 +420,7 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
             }
         } else {
             // 重命名本源文件（files/下的文件）
-            const QString newCurrentPath = s_instance->storePath() + "/" +
-                StoreManager::FILES_DIRNAME + "/" + toPathStr;
+            const QString newCurrentPath = QStringList({ s_instance->storePath(), StoreManager::FILES_DIRNAME, toPathStr }).join("/");
             if (!sourceFile.rename(newCurrentPath)) {
                 return -EIO;
             }

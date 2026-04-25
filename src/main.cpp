@@ -58,29 +58,35 @@ int main(int argc, char* argv[]) {
         QStringLiteral(_PROJECT_HOMEPAGE),
         QStringLiteral(_PROJECT_HOMEPAGE "/issues")
     );
-    aboutData.addAuthor("Neila", "any", "neilaspace@outlook.com", "https://neilasite.pages.dev", "https://avatars.githubusercontent.com/u/78797625");
+    aboutData.addAuthor(
+        QStringLiteral("Neila"),
+        QStringLiteral("any"),
+        QStringLiteral("neilaspace@outlook.com"),
+        QStringLiteral("https://neilasite.pages.dev"),
+        QStringLiteral("https://avatars.githubusercontent.com/u/78797625")
+    );
     KAboutData::setApplicationData(aboutData);
 
     CommandParser parser;
     aboutData.setupCommandLine(&parser);
 
     CommandHandler handler;
-#define executor(command) [&handler](QStringList arguments){ return command; }
+#define executor(command) [&handler](QStringList arguments){ return handler.execute##command; }
     parser
 
         // store 相关命令
         .registerCommand({ "store", "create" }, { "path" }, "Create a new store",
-            executor(handler.executeCreate(arguments[0])))
+            executor(Create(arguments[0])))
         .registerCommand({ "store", "load" }, { "store", "path" }, "Mount a store to path",
-            executor(handler.executeLoad(arguments[0], arguments[1])))
+            executor(Load(arguments[0], arguments[1])))
         .registerCommand({ "store", "unload" }, { "path" }, "Unmount a filesystem",
-            executor(handler.executeUnload(arguments[0])))
+            executor(Unload(arguments[0])))
 
         // backup 相关命令
         .registerCommand({ "backup", "create" }, { "path", "name" }, "Create backup of file",
-            executor(handler.executeBackup(arguments[0], arguments[1])))
+            executor(Backup(arguments[0], arguments[1])))
         .registerCommand({ "backup", "load" }, { "path", "name" }, "Load a backup file",
-            executor(handler.executeBackupLoad(arguments[0], arguments[1])))
+            executor(BackupLoad(arguments[0], arguments[1])))
 
         ;
 #undef executor

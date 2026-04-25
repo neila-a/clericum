@@ -15,48 +15,47 @@ CommandHandler::~CommandHandler() {
 
 CommandHandler::Result CommandHandler::executeCreate(const QString& path) {
     if (!validatePath(path)) {
-        return Result::fail("Invalid path", "Path contains invalid characters");
+        return Result::fail(QStringLiteral("Invalid path: path %1 contains invalid characters").arg(path));
     }
 
     const QFileInfo info(path);
     if (info.exists()) {
-        return Result::fail("Path already exists", path);
+        return Result::fail(QStringLiteral("Path %1 already exists").arg(path));
     }
 
     StoreManager manager;
     if (!manager.create(path)) {
-        return Result::fail("Failed to create store", path);
+        return Result::fail(QStringLiteral("Failed to create store at %1").arg(path));
     }
 
-    const QString msg = QString("Store created at: %1").arg(path);
-    return Result::ok(msg);
+    return Result::ok(QStringLiteral("Store created at %1").arg(path));
 }
 
 CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     const QString& mountPath) {
     // 检查挂载点是否已存在
     if (isPathMounted(mountPath)) {
-        return Result::fail("Already mounted", mountPath);
+        return Result::fail(QStringLiteral("Path %1 already mounted").arg(mountPath));
     }
 
     // 验证 store 路径
     const QFileInfo storeInfo(storePath);
     if (!storeInfo.exists() || !storeInfo.isDir()) {
-        return Result::fail("Invalid store path", storePath);
+        return Result::fail(QStringLiteral("Invalid store path %1").arg(storePath));
     }
 
     // 验证 store 是否有效
     StoreManager manager;
     manager.setStorePath(storePath);
     if (!manager.isValidStore()) {
-        return Result::fail("Not a valid store", storePath);
+        return Result::fail(QStringLiteral("%1 is not a valid store").arg(storePath));
     }
 
     // 创建挂载点目录
     QDir mountDir(mountPath);
     if (!mountDir.exists()) {
         if (!mountDir.mkpath(".")) {
-            return Result::fail("Failed to create mount directory", mountPath);
+            return Result::fail(QStringLiteral("Failed to create mount directory at %1").arg(mountPath));
         }
     }
 
@@ -68,7 +67,7 @@ CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     // 连接信号
     QObject::connect(fuse.data(), &ClericumFuse::errorOccurred, this,
         [](const QString& error) {
-            qWarning() << "FUSE error:" << error;
+            warn("FUSE error: %1", error);
         });
 
     // 直接挂载
@@ -92,13 +91,13 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     // 查找挂载点
     MountInfo mountInfo = findMountPoint(virtualPath);
     if (mountInfo.mountPath.isEmpty()) {
-        return Result::fail("Path not in mounted filesystem", virtualPath);
+        return Result::fail(QStringLiteral("Path %1 is not in mounted filesystem").arg(virtualPath));
     }
 
     // 检查备份名是否有效
     if (backupName.isEmpty() || backupName.contains('/') ||
         backupName.contains('-') || backupName.startsWith('.')) {
-        return Result::fail("Invalid backup name", backupName);
+        return Result::fail(QStringLiteral("Invalid backup name %1").arg(backupName));
     }
 
     // 解析本源文件名
@@ -108,15 +107,15 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     StoreManager storeManager;
     storeManager.setStorePath(mountInfo.storePath);
     if (!storeManager.sourceExists(sourceName)) {
-        return Result::fail("Source file not found", sourceName);
+        return Result::fail(QStringLiteral("Source file %1 not found").arg(sourceName));
     }
 
     // 检查备份名是否已存在，如果存在就先删除
     auto sourceInfo = storeManager.getSource(sourceName);
     for (const BackupInfo& backup : sourceInfo.backups) {
         if (backup.name == backupName) {
-            qWarning() << "Backup already exists" << backupName;
-            QFile::remove(sourceInfo.backupsPath + "/" + backup.name);
+            warn("Backup %1 already exists", backupName);
+            QFile::remove(QStringList({ sourceInfo.backupsPath, backup.name }).join("/"));
         }
     }
 
@@ -125,8 +124,7 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
         return Result::fail("Failed to create backup");
     }
 
-    const QString msg = QString("Backup '%1' created for '%2'")
-        .arg(backupName, sourceName);
+    const QString msg = QStringLiteral("Backup %1 created for %2").arg(backupName, sourceName);
 
     return Result::ok(msg);
 }
@@ -139,13 +137,13 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualP
     // 查找挂载点
     MountInfo mountInfo = findMountPoint(virtualPath);
     if (mountInfo.mountPath.isEmpty()) {
-        return Result::fail("Path not in mounted filesystem", virtualPath);
+        return Result::fail(QStringLiteral("Path %1 is not in mounted filesystem").arg(virtualPath));
     }
 
     // 检查备份名是否有效
     if (backupName.isEmpty() || backupName.contains('/') ||
         backupName.contains('-') || backupName.startsWith('.')) {
-        return Result::fail("Invalid backup name", backupName);
+        return Result::fail(QStringLiteral("Invalid backup name %1").arg(backupName));
     }
 
     // 解析本源文件名
@@ -155,7 +153,7 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualP
     StoreManager storeManager;
     storeManager.setStorePath(mountInfo.storePath);
     if (!storeManager.sourceExists(sourceName)) {
-        return Result::fail("Source file not found", sourceName);
+        return Result::fail(QStringLiteral("Source file %1 not found").arg(sourceName));
     }
 
     // 检查备份是否存在
@@ -169,16 +167,15 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualP
     }
 
     if (!backupExists) {
-        return Result::fail("Backup not found", backupName);
+        return Result::fail(QStringLiteral("Backup %1 not found").arg(backupName));
     }
 
     // 从备份加载到 current
     if (!storeManager.loadBackup(sourceName, backupName)) {
-        return Result::fail("Failed to load backup");
+        return Result::fail(QStringLiteral("Failed to load backup %1").arg(backupName));
     }
 
-    const QString msg = QString("Backup '%1' loaded to '%2'")
-        .arg(backupName, sourceName);
+    const QString msg = QStringLiteral("Backup %1 loaded to %2").arg(backupName, sourceName);
 
     return Result::ok(msg);
 }
@@ -207,7 +204,7 @@ CommandHandler::MountInfo CommandHandler::findMountPoint(const QString& path) co
             mountInfo.mountPath = dir.absolutePath();
             QFile file(dir.filePath(MOUNT_MARKER_FILE));
             if (!file.open(QIODevice::ReadOnly)) {
-                qWarning() << "Failed to open mount marker file" << file.fileName();
+                warn("Failed to open mount marker file %1", file.fileName());
                 return mountInfo;
             }
             const QString content = file.readAll();
