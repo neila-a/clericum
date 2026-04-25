@@ -12,7 +12,9 @@
 
 #include <QDir>
 
-#define log(type, text, ...) q##type().noquote() << QString(text).arg(__VA_ARGS__)
+#include <KLocalizedString>
+
+#define log(type, ...) q##type().noquote() << __VA_ARGS__
 #define warn(...) log(Warning, __VA_ARGS__)
 #define information(...) log(Info, __VA_ARGS__)
 #define critical(...) log(Critical, __VA_ARGS__)

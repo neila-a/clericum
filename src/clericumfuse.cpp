@@ -49,17 +49,17 @@ static fuse_operations clericFuseOps = {
 
 bool ClericumFuse::mount() {
     if (storePath().isEmpty()) {
-        warn("Store path not set", "");
+        warn(i18n("Store path not set"));
         return false;
     }
 
     if (m_mountPath.isEmpty()) {
-        warn("Mount path not set", "");
+        warn(i18n("Mount path not set"));
         return false;
     }
 
     if (!m_storeManager->isValidStore()) {
-        warn("Invalid store %1", storePath());
+        warn(i18n("Invalid store %1", storePath()));
         return false;
     }
 
@@ -67,7 +67,7 @@ bool ClericumFuse::mount() {
     QDir mountDir(m_mountPath);
     if (!mountDir.exists()) {
         if (!mountDir.mkpath(".")) {
-            warn("Failed to create mount directory %1", m_mountPath);
+            warn(i18n("Failed to create mount directory %1", m_mountPath));
             return false;
         }
     }
@@ -75,7 +75,7 @@ bool ClericumFuse::mount() {
     // 刷新文件列表
     getFileList() = m_storeManager->getFlatFileList();
 
-    information("Mounted %1 at %2", storePath(), mountPath());
+    information(i18n("Mounted %1 at %2", storePath(), mountPath()));
 
     // FUSE 参数 - 不使用调试模式 (-d)，fuse_main 会自动后台运行
     struct fuse_args args = FUSE_ARGS_INIT(0, NULL);
@@ -87,7 +87,7 @@ bool ClericumFuse::mount() {
     int ret = fuse_main(args.argc, args.argv, &clericFuseOps, nullptr);
 
     if (ret != 0) {
-        warn("FUSE exited with code %1", ret);
+        warn(i18n("FUSE exited with code %1", ret));
         return false;
     }
 

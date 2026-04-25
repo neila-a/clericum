@@ -28,8 +28,8 @@ void CommandParser::setApplication(const QString& description) {
         // 准备 commands
         commands.append(name.join(" "));
     }
-    QCommandLineParser::setApplicationDescription(QStringLiteral("%1\nCommands: %2").arg(description, commandsDescription));
-    addPositionalArgument("command", QStringLiteral("The command to execute: %1").arg(commands.join(", ")));
+    QCommandLineParser::setApplicationDescription(i18n("%1\n\nCommands: %2").arg(description, commandsDescription));
+    addPositionalArgument("command", i18n("The command to execute: %1").arg(commands.join(", ")));
 }
 
 CommandParser& CommandParser::registerCommand(const QStringList& name, const QStringList& arguments, const QString& description, executor executorFunction) {
@@ -65,7 +65,7 @@ int CommandParser::process(const QCoreApplication& app) {
             const QStringList neededArguments = info.arguments;
 
             if (name.length() + neededArguments.length() > arguments.length()) {
-                critical("%1 requires %2 arguments", name.join(", "), neededArguments.join(", "));
+                critical(i18n("%1 requires %2 arguments", name.join(", "), neededArguments.join(", ")));
                 showHelp(-1);
             }
 
@@ -78,18 +78,18 @@ int CommandParser::process(const QCoreApplication& app) {
         }
     }
     if (!foundCommand) {
-        critical("Unknown command %1", arguments.join(" "));
+        critical(i18n("Unknown command %1", arguments.join(" ")));
         showHelp(-1);
     }
 
     // 输出结果
     if (result.success) {
         if (!result.message.isEmpty()) {
-            information(result.message, "");
+            information(result.message);
         }
         return 0;
     } else {
-        critical("Error: %1", result.message);
+        critical(i18n("Error: %1", result.message));
         return -1;
     }
 }

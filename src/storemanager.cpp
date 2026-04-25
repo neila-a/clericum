@@ -24,13 +24,13 @@ bool StoreManager::create(const QString& path) {
 
     // 检查路径是否已存在
     if (dir.exists()) {
-        warn("Path %1 already exists", path);
+        warn(i18n("Path %1 already exists", path));
         return false;
     }
 
     // 创建主目录
     if (!dir.mkpath(".")) {
-        warn("Failed to create directory %1", path);
+        warn(i18n("Failed to create directory %1", path));
         return false;
     }
 
@@ -38,7 +38,7 @@ bool StoreManager::create(const QString& path) {
     const QString markerFilePath = QStringList({ m_storePath, METADATA_FILENAME }).join("/");
     QFile markerFile(markerFilePath);
     if (!markerFile.open(QIODevice::WriteOnly)) {
-        warn("Failed to create marker file", "");
+        warn(i18n("Failed to create marker file"));
         return false;
     }
     markerFile.close();
@@ -47,11 +47,11 @@ bool StoreManager::create(const QString& path) {
     const QString filesDir = QStringList({ m_storePath, FILES_DIRNAME }).join("/");
     const QString backupsDir = QStringList({ m_storePath, BACKUPS_DIRNAME }).join("/");
     if (!dir.mkpath(filesDir)) {
-        warn("Failed to create files directory", "");
+        warn(i18n("Failed to create files directory"));
         return false;
     }
     if (!dir.mkpath(backupsDir)) {
-        warn("Failed to create backups directory", "");
+        warn(i18n("Failed to create backups directory"));
         return false;
     }
 
@@ -63,14 +63,14 @@ bool StoreManager::create(const QString& path) {
 bool StoreManager::isValidStore(const QString& path) const {
     const QFileInfo info(path);
     if (!info.exists() || !info.isDir()) {
-        warn("Not a dir", "");
+        warn(i18n("Not a dir"));
         return false;
     }
 
     const QString metaFilePath = QStringList({ path, METADATA_FILENAME }).join("/");
     const QFileInfo metaFile(metaFilePath);
     if (!metaFile.exists() || !metaFile.isFile()) {
-        warn("No metafile", "");
+        warn(i18n("No metafile"));
         return false;
     }
 
@@ -82,7 +82,7 @@ bool StoreManager::isValidStore(const QString& path) const {
     bool filesAndBackups = filesDir.exists() && filesDir.isDir() &&
         backupsDir.exists() && backupsDir.isDir();
     if (!filesAndBackups) {
-        warn("No or invaild files or backups folder", "");
+        warn(i18n("No or invaild files or backups folder"));
     }
     return filesAndBackups;
 }
@@ -153,7 +153,7 @@ bool StoreManager::createSource(const QString& name) {
     QDir dir;
     if (!dir.exists(filesDirPath)) {
         if (!dir.mkpath(filesDirPath)) {
-            warn("Failed to create files directory %1", filesDirPath);
+            warn(i18n("Failed to create files directory %1", filesDirPath));
             return false;
         }
     }
@@ -161,14 +161,14 @@ bool StoreManager::createSource(const QString& name) {
     // 创建本源文件（空文件）
     QFile currentFile(filePath);
     if (!currentFile.open(QIODevice::WriteOnly)) {
-        warn("Failed to create source file %1", filePath);
+        warn(i18n("Failed to create source file %1", filePath));
         return false;
     }
     currentFile.close();
 
     // 创建 backups/本源名 子目录
     if (!dir.mkpath(backupsDirPath)) {
-        warn("Failed to create backups directory %1", backupsDirPath);
+        warn(i18n("Failed to create backups directory %1", backupsDirPath));
         return false;
     }
 
@@ -178,7 +178,7 @@ bool StoreManager::createSource(const QString& name) {
 bool StoreManager::createBackup(const QString& sourceName, const QString& backupName) {
     SourceInfo sourceInfo = getSource(sourceName);
     if (sourceInfo.currentPath.isEmpty()) {
-        warn("Source %1 not found", sourceName);
+        warn(i18n("Source %1 not found", sourceName));
         return false;
     }
     QDir dir;
@@ -188,7 +188,7 @@ bool StoreManager::createBackup(const QString& sourceName, const QString& backup
 
     // 复制 current 文件到备份
     if (!QFile::copy(sourceInfo.currentPath, backupPath)) {
-        warn("Failed to create backup at %1", backupPath);
+        warn(i18n("Failed to create backup at %1", backupPath));
         return false;
     }
 
@@ -198,7 +198,7 @@ bool StoreManager::createBackup(const QString& sourceName, const QString& backup
 bool StoreManager::loadBackup(const QString& sourceName, const QString& backupName) {
     SourceInfo sourceInfo = getSource(sourceName);
     if (sourceInfo.currentPath.isEmpty()) {
-        warn("Source %1 not found", sourceName);
+        warn(i18n("Source %1 not found", sourceName));
         return false;
     }
 
@@ -212,14 +212,14 @@ bool StoreManager::loadBackup(const QString& sourceName, const QString& backupNa
     }
 
     if (backupPath.isEmpty()) {
-        warn("Backup %1 not found", backupName);
+        warn(i18n("Backup %1 not found", backupName));
         return false;
     }
 
     // 复制备份文件到 current
     QFile::remove(sourceInfo.currentPath); // 必须显式覆盖
     if (!QFile::copy(backupPath, sourceInfo.currentPath)) {
-        warn("Failed to load backup %1 to current %2", backupPath, sourceInfo.currentPath);
+        warn(i18n("Failed to load backup %1 to current %2", backupPath, sourceInfo.currentPath));
         return false;
     }
 

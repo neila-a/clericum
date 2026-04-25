@@ -42,6 +42,7 @@ rec {
                             qt6.qtbase
                             qt6.qtdeclarative
                             kdePackages.kcoreaddons
+                            kdePackages.ki18n
                             fuse3
                         ];
 
@@ -52,10 +53,6 @@ rec {
                             "-DGLOBAL_PROJECT_VERSION=${version}"
                             "-DGLOBAL_PROJECT_HOMEPAGE=${homepage}"
                         ];
-
-                        env = {
-                            GLOBAL_PROJECT_DESCRIPTION = description;
-                        };
 
                         installPhase = ''
                             runHook preInstall
@@ -81,12 +78,8 @@ rec {
                         qt6.qtbase
                         qt6.qtdeclarative
                         kdePackages.kcoreaddons
-                        kdePackages.kconfig
-                        kdePackages.kcrash
-                        kdePackages.kdbusaddons
                         kdePackages.ki18n
-                        kdePackages.knotifications
-                        kdePackages.kwidgetsaddons
+                        kdePackages.kde-dev-scripts
                         fuse3
                     ];
 

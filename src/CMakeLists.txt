@@ -24,11 +24,11 @@ target_link_libraries(${GLOBAL_PROJECT_NAME}_app
         Qt6::Quick
         fuse3
         KF6::CoreAddons
+        KF6::I18n
 )
 
 target_compile_definitions(${GLOBAL_PROJECT_NAME}_app PRIVATE
     _PROJECT_NAME="${GLOBAL_PROJECT_NAME}"
-    _PROJECT_DESCRIPTION="${GLOBAL_PROJECT_DESCRIPTION}"
     _PROJECT_VERSION="${GLOBAL_PROJECT_VERSION}"
     _PROJECT_HOMEPAGE="${GLOBAL_PROJECT_HOMEPAGE}"
 )

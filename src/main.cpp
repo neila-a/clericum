@@ -46,12 +46,13 @@
   */
 int main(int argc, char* argv[]) {
     QCoreApplication app(argc, argv);
+    KLocalizedString::setApplicationDomain(_PROJECT_NAME);
 
     KAboutData aboutData(
         QStringLiteral(_PROJECT_NAME),
         QStringLiteral(_PROJECT_NAME),
         QStringLiteral(_PROJECT_VERSION),
-        QStringLiteral(_PROJECT_DESCRIPTION),
+        i18n("description"),
         KAboutLicense::GPL_V3,
         QStringLiteral("Copyright (C) 2026 Neila"),
         QString(),
@@ -75,18 +76,38 @@ int main(int argc, char* argv[]) {
     parser
 
         // store 相关命令
-        .registerCommand({ "store", "create" }, { "path" }, "Create a new store",
-            executor(Create(arguments[0])))
-        .registerCommand({ "store", "load" }, { "store", "path" }, "Mount a store to path",
-            executor(Load(arguments[0], arguments[1])))
-        .registerCommand({ "store", "unload" }, { "path" }, "Unmount a filesystem",
-            executor(Unload(arguments[0])))
+        .registerCommand(
+            { "store", "create" },
+            { i18n("path") },
+            i18n("Create a new store"),
+            executor(Create(arguments[0]))
+        )
+        .registerCommand(
+            { "store", "load" },
+            { i18n("store"), i18n("path") },
+            i18n("Mount a store to path"),
+            executor(Load(arguments[0], arguments[1]))
+        )
+        .registerCommand(
+            { "store", "unload" },
+            { i18n("path") },
+            i18n("Unmount a filesystem"),
+            executor(Unload(arguments[0]))
+        )
 
         // backup 相关命令
-        .registerCommand({ "backup", "create" }, { "path", "name" }, "Create backup of file",
-            executor(Backup(arguments[0], arguments[1])))
-        .registerCommand({ "backup", "load" }, { "path", "name" }, "Load a backup file",
-            executor(BackupLoad(arguments[0], arguments[1])))
+        .registerCommand(
+            { "backup", "create" },
+            { i18n("path"), i18n("name") },
+            i18n("Create backup of file"),
+            executor(Backup(arguments[0], arguments[1]))
+        )
+        .registerCommand(
+            { "backup", "load" },
+            { i18n("path"), i18n("name") },
+            i18n("Load a backup file"),
+            executor(BackupLoad(arguments[0], arguments[1]))
+        )
 
         ;
 #undef executor

@@ -57,7 +57,11 @@ public:
      */
     struct Result {
         bool success;         ///< 是否成功
-        QString message;     ///< 结果消息
+        /**
+         * @brief 结果消息
+         * 已经本地化了的。
+         */
+        QString message;
 
         /** @brief 成功结果 */
         static Result ok(const QString& msg = QString()) {
