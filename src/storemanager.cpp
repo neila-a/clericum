@@ -128,10 +128,6 @@ QMap<QString, SourceInfo> StoreManager::scanSources() const {
     return result;
 }
 
-QList<SourceInfo> StoreManager::getAllSources() const {
-    return scanSources().values();
-}
-
 SourceInfo StoreManager::getSource(const QString& name) const {
     return scanSources().value(name);
 }
@@ -223,29 +219,6 @@ bool StoreManager::loadBackup(const QString& sourceName, const QString& backupNa
     return true;
 }
 
-bool StoreManager::copyToCurrent(const QString& sourceName, const QString& sourceFile) {
-    SourceInfo sourceInfo = getSource(sourceName);
-    if (sourceInfo.currentPath.isEmpty()) {
-        qWarning() << "Source not found:" << sourceName;
-        return false;
-    }
-
-    // 如果本源文件条目不存在，先创建
-    if (!QFileInfo::exists(sourceInfo.currentPath)) {
-        if (!createSource(sourceName)) {
-            return false;
-        }
-    }
-
-    // 复制文件到本源文件
-    if (!QFile::copy(sourceFile, sourceInfo.currentPath)) {
-        qWarning() << "Failed to copy " << sourceFile << " to " << sourceInfo.currentPath;
-        return false;
-    }
-
-    return true;
-}
-
 bool StoreManager::sourceExists(const QString& name) const {
     return scanSources().contains(name);
 }
@@ -329,8 +302,4 @@ bool StoreManager::isBackupFile(const QString& virtualName) const {
     }
 
     return false;
-}
-
-QStringList StoreManager::getSourceNames() const {
-    return scanSources().keys();
 }

@@ -13,41 +13,41 @@
 
 #include "clericumfuse.h"
 
-/**
- * @class CommandHandler
- * @brief 命令处理器类
- *
- * CommandHandler 管理所有 clericum 命令的执行：
- * - store create: 创建新的 store 文件夹
- * - store load: 挂载 FUSE 文件系统
- * - store unload: 卸载 FUSE 文件系统
- * - backup create: 创建文件备份
- * - backup load: 从备份加载到本源文件
- *
- * ### 命令使用示例 ###
- *
- * #### store create 命令 ####
- * ```cpp
- * CommandHandler handler;
- * handler.executeCreate("/path/to/store");
- * ```
- *
- * #### store load 命令 ####
- * ```cpp
- * CommandHandler handler;
- * handler.executeLoad("/path/to/store", "/path/to/mount");
- * ```
- *
- * #### backup create 命令 ####
- * ```cpp
- * handler.executeBackup("/path/to/mount/file", "backup-name");
- * ```
- *
- * #### backup load 命令 ####
- * ```cpp
- * handler.executeBackupLoad("/path/to/mount/file", "backup-name");
- * ```
- */
+ /**
+  * @class CommandHandler
+  * @brief 命令处理器类
+  *
+  * CommandHandler 管理所有 clericum 命令的执行：
+  * - store create: 创建新的 store 文件夹
+  * - store load: 挂载 FUSE 文件系统
+  * - store unload: 卸载 FUSE 文件系统
+  * - backup create: 创建文件备份
+  * - backup load: 从备份加载到本源文件
+  *
+  * ### 命令使用示例 ###
+  *
+  * #### store create 命令 ####
+  * ```cpp
+  * CommandHandler handler;
+  * handler.executeCreate("/path/to/store");
+  * ```
+  *
+  * #### store load 命令 ####
+  * ```cpp
+  * CommandHandler handler;
+  * handler.executeLoad("/path/to/store", "/path/to/mount");
+  * ```
+  *
+  * #### backup create 命令 ####
+  * ```cpp
+  * handler.executeBackup("/path/to/mount/file", "backup-name");
+  * ```
+  *
+  * #### backup load 命令 ####
+  * ```cpp
+  * handler.executeBackupLoad("/path/to/mount/file", "backup-name");
+  * ```
+  */
 class CommandHandler : public QObject {
     Q_OBJECT
 
@@ -150,6 +150,8 @@ public:
      * - /mount/path/backupname-filename - 备份文件
      */
     Q_INVOKABLE Result executeBackupLoad(const QString& virtualPath, const QString& backupName);
+
+private:
 
     /**
      * @brief 检查路径是否在已挂载的文件系统中

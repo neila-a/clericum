@@ -44,17 +44,17 @@ public:
     void setApplication(const QString& description);
 
     /**
-     * @brief 判断一个 QStringList 是否由另一个 QStringList 开始。
-     */
-    static bool QStringListStartsWith(const QStringList& toCompare, const QStringList& starts);
-
-    /**
      * @brief 注册命令。
      * 可以链式调用。
      */
     CommandParser& registerCommand(const QStringList& name, const QStringList& arguments, const QString& description, executor executorFunction);
 
 private:
+
+    /**
+     * @brief 判断一个 QStringList 是否由另一个 QStringList 开始。
+     */
+    static bool QStringListStartsWith(const QStringList& toCompare, const QStringList& starts);
 
     /**
      * @brief 命令信息

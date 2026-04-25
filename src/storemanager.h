@@ -63,21 +63,25 @@ struct SourceInfo {
  * }
  *
  * manager.setStorePath("/path/to/store");
- * auto sources = manager.getAllSources();
  * ```
  */
+
+// 不要用 using 或 typedef
+#define filename static constexpr const char*
+
 class StoreManager : public QObject {
 
     Q_OBJECT;
     Q_PROPERTY(QString storePath READ storePath WRITE setStorePath);
 
 public:
+
     /** @brief 标记文件名 */
-    static constexpr const char* METADATA_FILENAME = ".clericum-store";
+    filename METADATA_FILENAME = ".clericum-store";
     /** @brief 本源文件目录名 */
-    static constexpr const char* FILES_DIRNAME = "files";
+    filename FILES_DIRNAME = "files";
     /** @brief 备份文件夹名 */
-    static constexpr const char* BACKUPS_DIRNAME = "backups";
+    filename BACKUPS_DIRNAME = "backups";
 
     /**
      * @brief 构造函数
@@ -134,15 +138,6 @@ public:
     bool isValidStore() const;
 
     /**
-     * @brief 获取所有本源文件信息
-     * @return 本源文件信息列表
-     *
-     * 扫描 store 文件夹，返回所有本源文件的信息。
-     * 每个 SourceInfo 包含本源文件名、所有备份文件信息等。
-     */
-    QList<SourceInfo> getAllSources() const;
-
-    /**
      * @brief 根据文件名获取本源文件信息
      * @param name 本源文件名
      * @return 本源文件信息，如果不存在则返回空结构
@@ -186,16 +181,6 @@ public:
      * 将指定备份的内容复制到本源文件。
      */
     bool loadBackup(const QString& sourceName, const QString& backupName);
-
-    /**
-     * @brief 复制文件到本源文件
-     * @param sourceName 本源文件名
-     * @param sourceFile 要复制的源文件路径
-     * @return 是否复制成功
-     *
-     * 将指定文件复制到本源文件位置。
-     */
-    bool copyToCurrent(const QString& sourceName, const QString& sourceFile);
 
     /**
      * @brief 检查本源文件是否存在
@@ -243,12 +228,6 @@ public:
      * @return 是否为备份文件
      */
     bool isBackupFile(const QString& virtualName) const;
-
-    /**
-     * @brief 获取 store 中的本源文件名列表
-     * @return 本源文件名列表
-     */
-    QStringList getSourceNames() const;
 
     /**
      * @brief 获取 store 路径下的本源文件映射（内部使用）
