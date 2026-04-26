@@ -1,8 +1,12 @@
-# clecricum
+# clericum
 
-English | [中文普通话大陆简体](./docs/README.cmn-Hans-CN.md)
+English | [中文普通话大陆简体](/docs/zh_CN/README.md)
 
 A FUSE-based file backup tool.
+
+## What's clericum
+
+*clericum* means cleric in Latin.
 
 ## Compilation
 
