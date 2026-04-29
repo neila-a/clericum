@@ -379,13 +379,13 @@ int ClericumFuse::fuseRename(const char* from, const char* to, unsigned int flag
 
         // 从虚拟名中提取备份名
         // fromPathStr 格式为 "备份名 - 本源名"
-        const QString fromBackupName = fromPathStr.left(fromPathStr.indexOf(" - "));
+        const QString fromBackupName = fromPathStr.left(fromPathStr.indexOf(separator));
         const QString fromBackupPath = QStringList({ fromSourceInfo.backupsPath, fromBackupName }).join("/");
 
         QFile backupFile(fromBackupPath);
         if (fromSourceName == toSourceName) {
             // 同一个本源文件，只需要重命名备份文件
-            const QString toBackupName = toPathStr.left(toPathStr.indexOf(" - "));
+            const QString toBackupName = toPathStr.left(toPathStr.indexOf(separator));
             const QString toBackupPath = QStringList({ toSourceInfo.backupsPath, toBackupName }).join("/");
 
             // 重命名备份文件

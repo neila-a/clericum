@@ -19,6 +19,8 @@
 #define information(...) log(Info, __VA_ARGS__)
 #define critical(...) log(Critical, __VA_ARGS__)
 
+const QString separator = " - ";
+
  /**
   * @brief 备份文件信息结构
   */
@@ -91,6 +93,14 @@ public:
     filename BACKUPS_DIRNAME = "backups";
 
     /**
+     * @brief 删除备份文件
+     * @param sourceName 本源文件名
+     * @param backupName 备份名称
+     * @return 是否成功删除
+     */
+    bool removeBackup(const QString& sourceName, const QString& backupName);
+
+    /**
      * @brief 构造函数
      * @param parent 父对象
      */
@@ -129,14 +139,7 @@ public:
      * }
      * ```
      */
-    bool create(const QString& path);
-
-    /**
-     * @brief 检查指定路径是否为有效的 store 文件夹
-     * @param path 要检查的路径
-     * @return 是否为有效的 store
-     */
-    bool isValidStore(const QString& path) const;
+    bool create();
 
     /**
      * @brief 检查当前设置的 store 是否有效

@@ -65,7 +65,7 @@ int CommandParser::process(const QCoreApplication& app) {
             const QStringList neededArguments = info.arguments;
 
             if (name.length() + neededArguments.length() > arguments.length()) {
-                critical(i18n("%1 requires %2 arguments", name.join(", "), neededArguments.join(", ")));
+                critical(i18n("%1 requires %2 arguments", name.join(" "), neededArguments.join(", ")));
                 showHelp(-1);
             }
 

@@ -24,7 +24,8 @@ CommandHandler::Result CommandHandler::executeCreate(const QString& path) {
     }
 
     StoreManager manager;
-    if (!manager.create(path)) {
+    manager.setStorePath(path);
+    if (!manager.create()) {
         return Result::fail(i18n("Failed to create store at %1", path));
     }
 
@@ -96,7 +97,7 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
 
     // 检查备份名是否有效
     if (backupName.isEmpty() || backupName.contains('/') ||
-        backupName.contains('-') || backupName.startsWith('.')) {
+        backupName.contains(separator) || backupName.startsWith('.')) {
         return Result::fail(i18n("Invalid backup name %1", backupName));
     }
 
@@ -129,25 +130,20 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     return Result::ok(msg);
 }
 
-CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualPath,
-    const QString& backupName) {
+CommandHandler::Result CommandHandler::executeBackupLoad(const QString& backupFile) {
     // 提取文件名
-    const QString fileName = extractFileName(virtualPath);
+    const QString fileName = extractFileName(backupFile);
 
     // 查找挂载点
-    MountInfo mountInfo = findMountPoint(virtualPath);
+    MountInfo mountInfo = findMountPoint(backupFile);
     if (mountInfo.mountPath.isEmpty()) {
-        return Result::fail(i18n("Path %1 is not in mounted filesystem", virtualPath));
-    }
-
-    // 检查备份名是否有效
-    if (backupName.isEmpty() || backupName.contains('/') ||
-        backupName.contains('-') || backupName.startsWith('.')) {
-        return Result::fail(i18n("Invalid backup name %1", backupName));
+        return Result::fail(i18n("Path %1 is not in mounted filesystem", backupFile));
     }
 
     // 解析本源文件名
     const QString sourceName = extractSourceName(fileName);
+    // 提取备份名
+    const QString backupName = extractBackupNameFromVirtualPath(backupFile);
 
     // 检查本源文件是否存在
     StoreManager storeManager;
@@ -176,6 +172,52 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& virtualP
     }
 
     const QString msg = i18n("Backup %1 loaded to %2", backupName, sourceName);
+
+    return Result::ok(msg);
+}
+
+CommandHandler::Result CommandHandler::executeBackupRemove(const QString& backupFile) {
+    // 提取文件名
+    const QString fileName = extractFileName(backupFile);
+
+    // 查找挂载点
+    MountInfo mountInfo = findMountPoint(backupFile);
+    if (mountInfo.mountPath.isEmpty()) {
+        return Result::fail(i18n("Path %1 is not in mounted filesystem", backupFile));
+    }
+
+    // 解析本源文件名
+    const QString sourceName = extractSourceName(fileName);
+    // 提取备份名
+    const QString backupName = extractBackupNameFromVirtualPath(backupFile);
+
+    // 检查本源文件是否存在
+    StoreManager storeManager;
+    storeManager.setStorePath(mountInfo.storePath);
+    if (!storeManager.sourceExists(sourceName)) {
+        return Result::fail(i18n("Source file %1 not found", sourceName));
+    }
+
+    // 检查备份是否存在
+    auto sourceInfo = storeManager.getSource(sourceName);
+    bool backupExists = false;
+    for (const BackupInfo& backup : sourceInfo.backups) {
+        if (backup.name == backupName) {
+            backupExists = true;
+            break;
+        }
+    }
+
+    if (!backupExists) {
+        return Result::fail(i18n("Backup %1 not found", backupName));
+    }
+
+    // 删除备份
+    if (!storeManager.removeBackup(sourceName, backupName)) {
+        return Result::fail(i18n("Failed to remove backup %1", backupName));
+    }
+
+    const QString msg = i18n("Backup %1 removed from %2", backupName, sourceName);
 
     return Result::ok(msg);
 }
@@ -239,10 +281,10 @@ QString CommandHandler::extractSourceName(const QString& virtualPath) {
 
     // 检查是否是备份文件（backupname-sourcename 格式）
     // 找到最后一个 - 后的部分
-    int lastDash = fileName.lastIndexOf('-');
+    int lastDash = fileName.lastIndexOf(separator);
     if (lastDash > 0) {
-        // 检查 -后的部分是否是已知的本源文件名
-        const QString possibleSource = fileName.mid(lastDash + 1);
+        // 检查 - 后的部分是否是已知的本源文件名
+        const QString possibleSource = fileName.mid(lastDash + separator.length());
 
         // 如果去掉备份名前缀后，剩余部分可能是一个本源文件名
         // 这需要 StoreManager 来验证，但这里做简单检查
@@ -252,6 +294,21 @@ QString CommandHandler::extractSourceName(const QString& virtualPath) {
     }
 
     return fileName;
+}
+
+QString CommandHandler::extractBackupNameFromVirtualPath(const QString& virtualPath) {
+    const QString fileName = extractFileName(virtualPath);
+
+    // 检查是否是备份文件（backupname-sourcename 格式）
+    // 找到最后一个 - 前的部分
+    int lastDash = fileName.lastIndexOf(separator);
+    if (lastDash > 0) {
+        // 返回 - 前的部分作为备份名
+        return fileName.left(lastDash);
+    }
+
+    // 如果不是备份文件格式，返回空字符串
+    return QString();
 }
 
 bool CommandHandler::validatePath(const QString& path) {

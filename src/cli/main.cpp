@@ -102,10 +102,16 @@ int main(int argc, char* argv[]) {
             executor(Backup(arguments[0], arguments[1]))
         )
         .registerCommand(
+            { "backup", "remove" },
+            { i18n("backup path") },
+            i18n("Remove a backup"),
+            executor(BackupRemove(arguments[0]))
+        )
+        .registerCommand(
             { "backup", "load" },
-            { i18n("path"), i18n("name") },
+            { i18n("backup path") },
             i18n("Load a backup file"),
-            executor(BackupLoad(arguments[0], arguments[1]))
+            executor(BackupLoad(arguments[0]))
         )
 
         ;

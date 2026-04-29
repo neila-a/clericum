@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: clericum 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/neila-a/clericum/issues\n"
-"POT-Creation-Date: 2026-04-29 20:15+0800\n"
+"POT-Creation-Date: 2026-04-29 20:59+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,6 @@ msgid "description"
 msgstr ""
 
 #: cli/main.cpp:80 cli/main.cpp:86 cli/main.cpp:92 cli/main.cpp:100
-#: cli/main.cpp:106
 msgid "path"
 msgstr ""
 
@@ -65,7 +64,7 @@ msgstr ""
 msgid "Unmount a filesystem"
 msgstr ""
 
-#: cli/main.cpp:100 cli/main.cpp:106
+#: cli/main.cpp:100
 msgid "name"
 msgstr ""
 
@@ -73,7 +72,15 @@ msgstr ""
 msgid "Create backup of file"
 msgstr ""
 
+#: cli/main.cpp:106 cli/main.cpp:112
+msgid "backup path"
+msgstr ""
+
 #: cli/main.cpp:107
+msgid "Remove a backup"
+msgstr ""
+
+#: cli/main.cpp:113
 msgid "Load a backup file"
 msgstr ""
 
@@ -109,75 +116,86 @@ msgstr ""
 msgid "Path %1 already exists"
 msgstr ""
 
-#: core/commandhandler.cpp:28
+#: core/commandhandler.cpp:29
 msgid "Failed to create store at %1"
 msgstr ""
 
-#: core/commandhandler.cpp:31
+#: core/commandhandler.cpp:32
 msgid "Store created at %1"
 msgstr ""
 
-#: core/commandhandler.cpp:38
+#: core/commandhandler.cpp:39
 msgid "Path %1 already mounted"
 msgstr ""
 
-#: core/commandhandler.cpp:44
+#: core/commandhandler.cpp:45
 msgid "Invalid store path %1"
 msgstr ""
 
-#: core/commandhandler.cpp:51
+#: core/commandhandler.cpp:52
 msgid "%1 is not a valid store"
 msgstr ""
 
-#: core/commandhandler.cpp:58
+#: core/commandhandler.cpp:59
 msgid "Failed to create mount directory at %1"
 msgstr ""
 
-#: core/commandhandler.cpp:70
+#: core/commandhandler.cpp:71
 msgid "FUSE error: %1"
 msgstr ""
 
-#: core/commandhandler.cpp:76
+#: core/commandhandler.cpp:77
 msgid "Unexpected situation: fuse->mount() didn't daemonize this program"
 msgstr ""
 
-#: core/commandhandler.cpp:94 core/commandhandler.cpp:140
+#: core/commandhandler.cpp:95 core/commandhandler.cpp:140
+#: core/commandhandler.cpp:186
 msgid "Path %1 is not in mounted filesystem"
 msgstr ""
 
-#: core/commandhandler.cpp:100 core/commandhandler.cpp:146
+#: core/commandhandler.cpp:101
 msgid "Invalid backup name %1"
 msgstr ""
 
-#: core/commandhandler.cpp:110 core/commandhandler.cpp:156
+#: core/commandhandler.cpp:111 core/commandhandler.cpp:152
+#: core/commandhandler.cpp:198
 msgid "Source file %1 not found"
 msgstr ""
 
-#: core/commandhandler.cpp:117
+#: core/commandhandler.cpp:118
 msgid "Backup %1 already exists"
 msgstr ""
 
-#: core/commandhandler.cpp:124
+#: core/commandhandler.cpp:125
 msgid "Failed to create backup"
 msgstr ""
 
-#: core/commandhandler.cpp:127
+#: core/commandhandler.cpp:128
 msgid "Backup %1 created for %2"
 msgstr ""
 
-#: core/commandhandler.cpp:170 core/storemanager.cpp:215
+#: core/commandhandler.cpp:166 core/commandhandler.cpp:212
+#: core/storemanager.cpp:219 core/storemanager.cpp:240
 msgid "Backup %1 not found"
 msgstr ""
 
-#: core/commandhandler.cpp:175
+#: core/commandhandler.cpp:171
 msgid "Failed to load backup %1"
 msgstr ""
 
-#: core/commandhandler.cpp:178
+#: core/commandhandler.cpp:174
 msgid "Backup %1 loaded to %2"
 msgstr ""
 
-#: core/commandhandler.cpp:207
+#: core/commandhandler.cpp:217
+msgid "Failed to remove backup %1"
+msgstr ""
+
+#: core/commandhandler.cpp:220
+msgid "Backup %1 removed from %2"
+msgstr ""
+
+#: core/commandhandler.cpp:249
 msgid "Failed to open mount marker file %1"
 msgstr ""
 
@@ -186,7 +204,7 @@ msgid "Failed to create directory %1"
 msgstr ""
 
 #: core/storemanager.cpp:41
-msgid "Failed to create marker file"
+msgid "Failed to create marker file %1"
 msgstr ""
 
 #: core/storemanager.cpp:50
@@ -209,26 +227,31 @@ msgstr ""
 msgid "No or invaild files or backups folder"
 msgstr ""
 
-#: core/storemanager.cpp:156
+#: core/storemanager.cpp:152
 msgid "Failed to create files directory %1"
 msgstr ""
 
-#: core/storemanager.cpp:164
+#: core/storemanager.cpp:160
 msgid "Failed to create source file %1"
 msgstr ""
 
-#: core/storemanager.cpp:171
+#: core/storemanager.cpp:167
 msgid "Failed to create backups directory %1"
 msgstr ""
 
-#: core/storemanager.cpp:181 core/storemanager.cpp:201
+#: core/storemanager.cpp:177 core/storemanager.cpp:197
+#: core/storemanager.cpp:226
 msgid "Source %1 not found"
 msgstr ""
 
-#: core/storemanager.cpp:191
+#: core/storemanager.cpp:187
 msgid "Failed to create backup at %1"
 msgstr ""
 
-#: core/storemanager.cpp:222
+#: core/storemanager.cpp:213
+msgid "Failed to remove backup file %1"
+msgstr ""
+
+#: core/storemanager.cpp:247
 msgid "Failed to load backup %1 to current %2"
 msgstr ""

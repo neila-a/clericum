@@ -138,16 +138,23 @@ public:
 
     /**
      * @brief 执行 backup load 命令
-     * @param virtualPath 虚拟文件路径（在 FUSE 文件系统中）
-     * @param backupName 备份名称
+     * @param backupFile 备份文件路径（在 FUSE 文件系统中的完整路径）
      * @return 执行结果
      *
      * 从备份加载文件内容到本源文件。
-     * 虚拟路径格式：
-     * - /mount/path/filename - 本源文件
+     * 备份文件格式：
      * - /mount/path/backupname-filename - 备份文件
      */
-    Q_INVOKABLE Result executeBackupLoad(const QString& virtualPath, const QString& backupName);
+    Q_INVOKABLE Result executeBackupLoad(const QString& backupFile);
+
+    /**
+     * @brief 执行 backup remove 命令
+     * @param backupFile 备份文件路径（在 FUSE 文件系统中的完整路径）
+     * @return 执行结果
+     *
+     * 删除指定文件的备份。
+     */
+    Q_INVOKABLE Result executeBackupRemove(const QString& backupFile);
 
 private:
 
@@ -182,6 +189,15 @@ private:
      * 对于备份文件（backupname-filename），返回 filename。
      */
     static QString extractSourceName(const QString& virtualPath);
+
+    /**
+     * @brief 从虚拟路径提取备份名
+     * @param virtualPath 虚拟路径
+     * @return 备份名
+     *
+     * 对于备份文件（backupname-filename），返回 backupname。
+     */
+    static QString extractBackupNameFromVirtualPath(const QString& virtualPath);
 
     /**
      * @brief 验证路径是否安全
