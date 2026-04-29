@@ -22,7 +22,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Core)
+qt_standard_project_setup(REQUIRES 6.10)
 find_package(KF6CoreAddons)
 find_package(KF6I18n)
 

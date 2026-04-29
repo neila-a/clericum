@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: clericum 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/neila-a/clericum/issues\n"
-"POT-Creation-Date: 2026-04-25 20:08+0800\n"
+"POT-Creation-Date: 2026-04-29 20:15+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,217 +17,218 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: clericumfuse.cpp:52
-msgid "Store path not set"
-msgstr ""
-
-#: clericumfuse.cpp:57
-msgid "Mount path not set"
-msgstr ""
-
-#: clericumfuse.cpp:62
-msgid "Invalid store %1"
-msgstr ""
-
-#: clericumfuse.cpp:70
-msgid "Failed to create mount directory %1"
-msgstr ""
-
-#: clericumfuse.cpp:78
-msgid "Mounted %1 at %2"
-msgstr ""
-
-#: clericumfuse.cpp:90
-msgid "FUSE exited with code %1"
-msgstr ""
-
-#: commandhandler.cpp:18
-msgid "Invalid path: path %1 contains invalid characters"
-msgstr ""
-
-#: commandhandler.cpp:23 storemanager.cpp:27
-msgid "Path %1 already exists"
-msgstr ""
-
-#: commandhandler.cpp:28
-msgid "Failed to create store at %1"
-msgstr ""
-
-#: commandhandler.cpp:31
-msgid "Store created at %1"
-msgstr ""
-
-#: commandhandler.cpp:38
-msgid "Path %1 already mounted"
-msgstr ""
-
-#: commandhandler.cpp:44
-msgid "Invalid store path %1"
-msgstr ""
-
-#: commandhandler.cpp:51
-msgid "%1 is not a valid store"
-msgstr ""
-
-#: commandhandler.cpp:58
-msgid "Failed to create mount directory at %1"
-msgstr ""
-
-#: commandhandler.cpp:70
-msgid "FUSE error: %1"
-msgstr ""
-
-#: commandhandler.cpp:76
-msgid "Unexpected situation: fuse->mount() didn't daemonize this program"
-msgstr ""
-
-#: commandhandler.cpp:94 commandhandler.cpp:140
-msgid "Path %1 is not in mounted filesystem"
-msgstr ""
-
-#: commandhandler.cpp:100 commandhandler.cpp:146
-msgid "Invalid backup name %1"
-msgstr ""
-
-#: commandhandler.cpp:110 commandhandler.cpp:156
-msgid "Source file %1 not found"
-msgstr ""
-
-#: commandhandler.cpp:117
-msgid "Backup %1 already exists"
-msgstr ""
-
-#: commandhandler.cpp:124
-msgid "Failed to create backup"
-msgstr ""
-
-#: commandhandler.cpp:127
-msgid "Backup %1 created for %2"
-msgstr ""
-
-#: commandhandler.cpp:170 storemanager.cpp:215
-msgid "Backup %1 not found"
-msgstr ""
-
-#: commandhandler.cpp:175
-msgid "Failed to load backup %1"
-msgstr ""
-
-#: commandhandler.cpp:178
-msgid "Backup %1 loaded to %2"
-msgstr ""
-
-#: commandhandler.cpp:207
-msgid "Failed to open mount marker file %1"
-msgstr ""
-
-#: commandparser.cpp:31
+#: cli/commandparser.cpp:31
 msgid ""
 "%1\n"
 "\n"
 "Commands: %2"
 msgstr ""
 
-#: commandparser.cpp:32
+#: cli/commandparser.cpp:32
 msgid "The command to execute: %1"
 msgstr ""
 
-#: commandparser.cpp:68
+#: cli/commandparser.cpp:68
 msgid "%1 requires %2 arguments"
 msgstr ""
 
-#: commandparser.cpp:81
+#: cli/commandparser.cpp:81
 msgid "Unknown command %1"
 msgstr ""
 
-#: commandparser.cpp:92
+#: cli/commandparser.cpp:92
 msgid "Error: %1"
 msgstr ""
 
-#: main.cpp:55
+#: cli/main.cpp:54
 msgid "description"
 msgstr ""
 
-#: main.cpp:81 main.cpp:87 main.cpp:93 main.cpp:101 main.cpp:107
+#: cli/main.cpp:80 cli/main.cpp:86 cli/main.cpp:92 cli/main.cpp:100
+#: cli/main.cpp:106
 msgid "path"
 msgstr ""
 
-#: main.cpp:82
+#: cli/main.cpp:81
 msgid "Create a new store"
 msgstr ""
 
-#: main.cpp:87
+#: cli/main.cpp:86
 msgid "store"
 msgstr ""
 
-#: main.cpp:88
+#: cli/main.cpp:87
 msgid "Mount a store to path"
 msgstr ""
 
-#: main.cpp:94
+#: cli/main.cpp:93
 msgid "Unmount a filesystem"
 msgstr ""
 
-#: main.cpp:101 main.cpp:107
+#: cli/main.cpp:100 cli/main.cpp:106
 msgid "name"
 msgstr ""
 
-#: main.cpp:102
+#: cli/main.cpp:101
 msgid "Create backup of file"
 msgstr ""
 
-#: main.cpp:108
+#: cli/main.cpp:107
 msgid "Load a backup file"
 msgstr ""
 
-#: storemanager.cpp:33
+#: core/clericumfuse.cpp:52
+msgid "Store path not set"
+msgstr ""
+
+#: core/clericumfuse.cpp:57
+msgid "Mount path not set"
+msgstr ""
+
+#: core/clericumfuse.cpp:62
+msgid "Invalid store %1"
+msgstr ""
+
+#: core/clericumfuse.cpp:70
+msgid "Failed to create mount directory %1"
+msgstr ""
+
+#: core/clericumfuse.cpp:78
+msgid "Mounted %1 at %2"
+msgstr ""
+
+#: core/clericumfuse.cpp:90
+msgid "FUSE exited with code %1"
+msgstr ""
+
+#: core/commandhandler.cpp:18
+msgid "Invalid path: path %1 contains invalid characters"
+msgstr ""
+
+#: core/commandhandler.cpp:23 core/storemanager.cpp:27
+msgid "Path %1 already exists"
+msgstr ""
+
+#: core/commandhandler.cpp:28
+msgid "Failed to create store at %1"
+msgstr ""
+
+#: core/commandhandler.cpp:31
+msgid "Store created at %1"
+msgstr ""
+
+#: core/commandhandler.cpp:38
+msgid "Path %1 already mounted"
+msgstr ""
+
+#: core/commandhandler.cpp:44
+msgid "Invalid store path %1"
+msgstr ""
+
+#: core/commandhandler.cpp:51
+msgid "%1 is not a valid store"
+msgstr ""
+
+#: core/commandhandler.cpp:58
+msgid "Failed to create mount directory at %1"
+msgstr ""
+
+#: core/commandhandler.cpp:70
+msgid "FUSE error: %1"
+msgstr ""
+
+#: core/commandhandler.cpp:76
+msgid "Unexpected situation: fuse->mount() didn't daemonize this program"
+msgstr ""
+
+#: core/commandhandler.cpp:94 core/commandhandler.cpp:140
+msgid "Path %1 is not in mounted filesystem"
+msgstr ""
+
+#: core/commandhandler.cpp:100 core/commandhandler.cpp:146
+msgid "Invalid backup name %1"
+msgstr ""
+
+#: core/commandhandler.cpp:110 core/commandhandler.cpp:156
+msgid "Source file %1 not found"
+msgstr ""
+
+#: core/commandhandler.cpp:117
+msgid "Backup %1 already exists"
+msgstr ""
+
+#: core/commandhandler.cpp:124
+msgid "Failed to create backup"
+msgstr ""
+
+#: core/commandhandler.cpp:127
+msgid "Backup %1 created for %2"
+msgstr ""
+
+#: core/commandhandler.cpp:170 core/storemanager.cpp:215
+msgid "Backup %1 not found"
+msgstr ""
+
+#: core/commandhandler.cpp:175
+msgid "Failed to load backup %1"
+msgstr ""
+
+#: core/commandhandler.cpp:178
+msgid "Backup %1 loaded to %2"
+msgstr ""
+
+#: core/commandhandler.cpp:207
+msgid "Failed to open mount marker file %1"
+msgstr ""
+
+#: core/storemanager.cpp:33
 msgid "Failed to create directory %1"
 msgstr ""
 
-#: storemanager.cpp:41
+#: core/storemanager.cpp:41
 msgid "Failed to create marker file"
 msgstr ""
 
-#: storemanager.cpp:50
+#: core/storemanager.cpp:50
 msgid "Failed to create files directory"
 msgstr ""
 
-#: storemanager.cpp:54
+#: core/storemanager.cpp:54
 msgid "Failed to create backups directory"
 msgstr ""
 
-#: storemanager.cpp:66
+#: core/storemanager.cpp:66
 msgid "Not a dir"
 msgstr ""
 
-#: storemanager.cpp:73
+#: core/storemanager.cpp:73
 msgid "No metafile"
 msgstr ""
 
-#: storemanager.cpp:85
+#: core/storemanager.cpp:85
 msgid "No or invaild files or backups folder"
 msgstr ""
 
-#: storemanager.cpp:156
+#: core/storemanager.cpp:156
 msgid "Failed to create files directory %1"
 msgstr ""
 
-#: storemanager.cpp:164
+#: core/storemanager.cpp:164
 msgid "Failed to create source file %1"
 msgstr ""
 
-#: storemanager.cpp:171
+#: core/storemanager.cpp:171
 msgid "Failed to create backups directory %1"
 msgstr ""
 
-#: storemanager.cpp:181 storemanager.cpp:201
+#: core/storemanager.cpp:181 core/storemanager.cpp:201
 msgid "Source %1 not found"
 msgstr ""
 
-#: storemanager.cpp:191
+#: core/storemanager.cpp:191
 msgid "Failed to create backup at %1"
 msgstr ""
 
-#: storemanager.cpp:222
+#: core/storemanager.cpp:222
 msgid "Failed to load backup %1 to current %2"
 msgstr ""

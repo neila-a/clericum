@@ -8,7 +8,7 @@
 #pragma once
 
 #include <QCommandLineParser>
-#include "commandhandler.h"
+#include <commandhandler.h>
 
 using namespace std;
 using executor = function<CommandHandler::Result(QStringList)>;

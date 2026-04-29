@@ -6,7 +6,7 @@ A FUSE-based file backup tool.
 
 ## What's clericum
 
-*clericum* means cleric in Latin.
+*clericum* means "cleric" in Latin.
 
 ## Compilation
 

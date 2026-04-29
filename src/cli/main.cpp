@@ -15,7 +15,6 @@
  * - store unload <path>: 卸载挂载点
  * - backup create <path> <name>: 创建备份
  * - backup load <path> <name>: 从备份加载到本源文件
- * - gui: 启动图形界面
  *
  * @section structure Store 结构
  *
