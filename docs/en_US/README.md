@@ -20,4 +20,6 @@ nix build
 
 ## To-Do
 
-- [ ] Implement the GUI.
+Actually, the reason these items are listed here instead of in my personal To-Do list is that they won't be accomplished in the short term...
+
+- [ ] Implement the FileItemAction plugin.
