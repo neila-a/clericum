@@ -83,7 +83,7 @@ bool ClericumFuse::mount() {
     fuse_opt_add_arg(&args, m_mountPath.toUtf8().data());
 
     // 在当前线程运行 FUSE 主循环
-    // 不使用 -d 参数时，fuse_main 会自动 daemonize 并在后台运行
+    // 不使用 -d 参数时，fuse_main 会自动守护进程化并在后台运行
     int ret = fuse_main(args.argc, args.argv, &clericFuseOps, nullptr);
 
     if (ret != 0) {
