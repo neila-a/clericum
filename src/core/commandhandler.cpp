@@ -6,6 +6,9 @@
 #include "commandhandler.h"
 #include <QProcess>
 
+#include <algorithm>    // std::ranges::any_of
+#include <ranges>       // C++20 范围库
+
 CommandHandler::CommandHandler(QObject* parent)
     : QObject{ parent } {
 }
@@ -111,13 +114,12 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
         return Result::fail(i18n("Source file %1 not found", sourceName));
     }
 
-    // 检查备份名是否已存在，如果存在就先删除
+    // 检查备份名是否已存在，如果存在就先删除（C++20 std::ranges::any_of）
     auto sourceInfo = storeManager.getSource(sourceName);
-    for (const BackupInfo& backup : sourceInfo.backups) {
-        if (backup.name == backupName) {
-            warn(i18n("Backup %1 already exists", backupName));
-            QFile::remove(QStringList({ sourceInfo.backupsPath, backup.name }).join("/"));
-        }
+    if (std::ranges::any_of(sourceInfo.backups,
+        [&backupName](const BackupInfo& b) { return b.name == backupName; })) {
+        warn(i18n("Backup %1 already exists", backupName));
+        QFile::remove(QStringList({ sourceInfo.backupsPath, backupName }).join("/"));
     }
 
     // 创建备份
@@ -152,15 +154,10 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& backupFi
         return Result::fail(i18n("Source file %1 not found", sourceName));
     }
 
-    // 检查备份是否存在
+    // 检查备份是否存在（C++20 std::ranges::any_of）
     auto sourceInfo = storeManager.getSource(sourceName);
-    bool backupExists = false;
-    for (const BackupInfo& backup : sourceInfo.backups) {
-        if (backup.name == backupName) {
-            backupExists = true;
-            break;
-        }
-    }
+    const bool backupExists = std::ranges::any_of(sourceInfo.backups,
+        [&backupName](const BackupInfo& b) { return b.name == backupName; });
 
     if (!backupExists) {
         return Result::fail(i18n("Backup %1 not found", backupName));
@@ -198,15 +195,10 @@ CommandHandler::Result CommandHandler::executeBackupRemove(const QString& backup
         return Result::fail(i18n("Source file %1 not found", sourceName));
     }
 
-    // 检查备份是否存在
+    // 检查备份是否存在（C++20 std::ranges::any_of）
     auto sourceInfo = storeManager.getSource(sourceName);
-    bool backupExists = false;
-    for (const BackupInfo& backup : sourceInfo.backups) {
-        if (backup.name == backupName) {
-            backupExists = true;
-            break;
-        }
-    }
+    const bool backupExists = std::ranges::any_of(sourceInfo.backups,
+        [&backupName](const BackupInfo& b) { return b.name == backupName; });
 
     if (!backupExists) {
         return Result::fail(i18n("Backup %1 not found", backupName));

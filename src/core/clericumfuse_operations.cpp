@@ -1,5 +1,9 @@
 #include "clericumfuse.h"
 
+#include <algorithm>    // std::min, std::ranges::copy
+#include <ranges>       // C++20 范围库
+#include <span>         // C++20 std::span：安全的连续内存视图
+
 int ClericumFuse::fuseGetattr(const char* path, struct stat* stbuf,
     fuse_file_info* fi) {
     Q_UNUSED(fi);
@@ -203,16 +207,20 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
 
+    // C++20 std::span：将裸指针 + 大小封装为带边界的连续内存视图
+    const std::span<char> outBuf(buf, size);
+
     // 检查是否是挂载点标记文件
     if (pathStr == MOUNT_MARKER_FILE) {
         const QByteArray storePathData = s_instance->storePath().toUtf8();
         if (offset < storePathData.size()) {
-            int avail = storePathData.size() - static_cast<int>(offset);
-            if (static_cast<int>(size) < avail) {
-                avail = static_cast<int>(size);
-            }
-            memcpy(buf, storePathData.constData() + offset, avail);
-            return avail;
+            const qint64 avail = std::min<qint64>(
+                storePathData.size() - offset,
+                static_cast<qint64>(outBuf.size()));
+            std::ranges::copy(storePathData.constData() + offset,
+                storePathData.constData() + offset + avail,
+                outBuf.data());
+            return static_cast<int>(avail);
         }
         return 0;
     }
@@ -232,7 +240,7 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
         return -EIO;
     }
 
-    qint64 bytesRead = file.read(buf, size);
+    const qint64 bytesRead = file.read(outBuf.data(), outBuf.size());
     file.close();
 
     return static_cast<int>(bytesRead);
@@ -248,6 +256,9 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
 
     QString pathStr = QString::fromUtf8(path);
     pathStr = pathStr.mid(1);  // 移除前导 /
+
+    // C++20 std::span：将输入缓冲封装为只读连续内存视图
+    const std::span<const char> inBuf(buf, size);
 
     QString realPath;
     // 备份文件的写入重定向到本源文件
@@ -280,7 +291,7 @@ int ClericumFuse::fuseWrite(const char* path, const char* buf, size_t size,
         return -EIO;
     }
 
-    qint64 bytesWritten = file.write(buf, size);
+    const qint64 bytesWritten = file.write(inBuf.data(), inBuf.size());
     file.close();
 
     return static_cast<int>(bytesWritten);

@@ -64,12 +64,12 @@ public:
         QString message;
 
         /** @brief 成功结果 */
-        static Result ok(const QString& msg = QString()) {
+        [[nodiscard]] static Result ok(const QString& msg = QString()) {
             return { true, msg };
         }
 
         /** @brief 失败结果 */
-        static Result fail(const QString& msg) {
+        [[nodiscard]] static Result fail(const QString& msg) {
             return { false, msg };
         }
     };

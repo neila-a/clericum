@@ -6,6 +6,8 @@
 #include "commandparser.h"
 #include <QRegularExpression>
 
+#include <ranges>   // C++20 范围库：std::ranges::starts_with
+
 CommandParser::CommandParser(QObject* parent)
     : QObject{ parent } {
 }
@@ -38,12 +40,11 @@ CommandParser& CommandParser::registerCommand(const QStringList& name, const QSt
 }
 
 bool CommandParser::QStringListStartsWith(const QStringList& toCompare, const QStringList& starts) {
-    for (int i = 0; i < starts.size(); i++) {
-        if (toCompare.at(i) != starts.at(i)) {
-            return false;
-        }
+    // C++20 范围比较：对 toCompare 的前 starts.size() 个元素与 starts 做相等比较
+    if (starts.size() > toCompare.size()) {
+        return false;
     }
-    return true;
+    return std::ranges::equal(toCompare | std::views::take(starts.size()), starts);
 }
 
 int CommandParser::process(const QCoreApplication& app) {

@@ -5,6 +5,9 @@
 
 #include "storemanager.h"
 
+#include <algorithm>    // std::ranges::find_if
+#include <ranges>       // C++20 范围库
+
 StoreManager::StoreManager(QObject* parent)
     : QObject{ parent } {
 }
@@ -198,22 +201,16 @@ bool StoreManager::removeBackup(const QString& sourceName, const QString& backup
         return false;
     }
 
-    // 查找并删除指定的备份文件
-    for (const BackupInfo& backup : sourceInfo.backups) {
-        if (backup.name == backupName) {
-            if (QFile::remove(backup.fullPath)) {
-                // 从备份列表中移除
-                auto it = std::find_if(sourceInfo.backups.begin(), sourceInfo.backups.end(),
-                    [&backupName](const BackupInfo& b) { return b.name == backupName; });
-                if (it != sourceInfo.backups.end()) {
-                    sourceInfo.backups.erase(it);
-                }
-                return true;
-            } else {
-                warn(i18n("Failed to remove backup file %1", backup.fullPath));
-                return false;
-            }
+    // 查找并删除指定的备份文件（C++20 std::ranges::find_if 简化查找）
+    const auto it = std::ranges::find_if(sourceInfo.backups,
+        [&backupName](const BackupInfo& b) { return b.name == backupName; });
+    if (it != sourceInfo.backups.end()) {
+        if (QFile::remove(it->fullPath)) {
+            sourceInfo.backups.erase(it);   // 从备份列表中移除
+            return true;
         }
+        warn(i18n("Failed to remove backup file %1", it->fullPath));
+        return false;
     }
 
     warn(i18n("Backup %1 not found", backupName));
@@ -227,24 +224,18 @@ bool StoreManager::loadBackup(const QString& sourceName, const QString& backupNa
         return false;
     }
 
-    // 查找指定的备份
-    QString backupPath;
-    for (const BackupInfo& backup : sourceInfo.backups) {
-        if (backup.name == backupName) {
-            backupPath = backup.fullPath;
-            break;
-        }
-    }
-
-    if (backupPath.isEmpty()) {
+    // 查找指定的备份（C++20 std::ranges::find_if）
+    const auto backup = std::ranges::find_if(sourceInfo.backups,
+        [&backupName](const BackupInfo& b) { return b.name == backupName; });
+    if (backup == sourceInfo.backups.end()) {
         warn(i18n("Backup %1 not found", backupName));
         return false;
     }
 
     // 复制备份文件到 current
     QFile::remove(sourceInfo.currentPath); // 必须显式覆盖
-    if (!QFile::copy(backupPath, sourceInfo.currentPath)) {
-        warn(i18n("Failed to load backup %1 to current %2", backupPath, sourceInfo.currentPath));
+    if (!QFile::copy(backup->fullPath, sourceInfo.currentPath)) {
+        warn(i18n("Failed to load backup %1 to current %2", backup->fullPath, sourceInfo.currentPath));
         return false;
     }
 
@@ -266,7 +257,7 @@ QMap<QString, QString> StoreManager::getFlatFileList() const {
 
         // 添加备份文件（命名为 "备份名 - 本源名"）
         for (const BackupInfo& backup : sourceInfo.backups) {
-            const QString virtualName = QStringLiteral("%1 - %2").arg(backup.name, sourceInfo.name);
+            const QString virtualName = backup.name + separator + sourceInfo.name;
             result.insert(virtualName, backup.fullPath);
         }
     }

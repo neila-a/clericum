@@ -14,12 +14,15 @@
 
 #include <KLocalizedString>
 
+// Qt 优先的日志宏：保留 qInfo/qWarning/qCritical 等 Qt 设施，仅用可变参数宏简化调用。
 #define log(type, ...) q##type().noquote() << __VA_ARGS__
 #define warn(...) log(Warning, __VA_ARGS__)
 #define information(...) log(Info, __VA_ARGS__)
 #define critical(...) log(Critical, __VA_ARGS__)
 
-const QString separator = " - ";
+// 备份名与本源名之间的分隔符。使用 inline 变量（C++17）避免潜在的 ODR 问题，
+// 并改用 QStringView（C++17/Qt6 轻量视图）减少不必要的字符串拷贝。
+inline constexpr QStringView separator = u" - ";
 
  /**
   * @brief 备份文件信息结构
@@ -121,7 +124,7 @@ public:
      * @brief 获取当前 store 文件夹路径
      * @return store 文件夹路径
      */
-    QString storePath() const;
+    [[nodiscard]] QString storePath() const;
 
     /**
      * @brief 创建新的 store 文件夹
@@ -145,21 +148,21 @@ public:
      * @brief 检查当前设置的 store 是否有效
      * @return 是否有效
      */
-    bool isValidStore() const;
+    [[nodiscard]] bool isValidStore() const;
 
     /**
      * @brief 根据文件名获取本源文件信息
      * @param name 本源文件名
      * @return 本源文件信息，如果不存在则返回空结构
      */
-    SourceInfo getSource(const QString& name) const;
+    [[nodiscard]] SourceInfo getSource(const QString& name) const;
 
     /**
      * @brief 获取本源文件的 current 文件路径
      * @param name 本源文件名
      * @return current 文件完整路径
      */
-    QString getCurrentPath(const QString& name) const;
+    [[nodiscard]] QString getCurrentPath(const QString& name) const;
 
     /**
      * @brief 创建新的本源文件条目
@@ -197,7 +200,7 @@ public:
      * @param name 本源文件名
      * @return 是否存在
      */
-    bool sourceExists(const QString& name) const;
+    [[nodiscard]] bool sourceExists(const QString& name) const;
 
     /**
      * @brief 获取 store 路径下的所有条目（平铺视图）
@@ -208,7 +211,7 @@ public:
      *
      * 这个方法用于提供给 FUSE 文件系统显示平铺的文件列表。
      */
-    QMap<QString, QString> getFlatFileList() const;
+    [[nodiscard]] QMap<QString, QString> getFlatFileList() const;
 
     /**
      * @brief 解析虚拟文件名
@@ -221,7 +224,7 @@ public:
      * - 对于本源文件：直接是本源文件名
      * - 对于备份文件：是 "备份名-本源名" 格式
      */
-    bool parseVirtualName(const QString& virtualName,
+    [[nodiscard]] bool parseVirtualName(const QString& virtualName,
         QString& actualSourceName,
         bool& isBackup) const;
 
@@ -230,20 +233,20 @@ public:
      * @param virtualName 虚拟文件名
      * @return 真实文件路径，如果是备份则返回本源文件路径
      */
-    QString resolveRealPath(const QString& virtualName) const;
+    [[nodiscard]] QString resolveRealPath(const QString& virtualName) const;
 
     /**
      * @brief 检查文件是否为备份文件
      * @param virtualName 虚拟文件名
      * @return 是否为备份文件
      */
-    bool isBackupFile(const QString& virtualName) const;
+    [[nodiscard]] bool isBackupFile(const QString& virtualName) const;
 
     /**
      * @brief 获取 store 路径下的本源文件映射（内部使用）
      * @return 本源文件名到 SourceInfo 的映射
      */
-    QMap<QString, SourceInfo> scanSources() const;
+    [[nodiscard]] QMap<QString, SourceInfo> scanSources() const;
 
 private:
     QString m_storePath;                    ///< store 文件夹路径

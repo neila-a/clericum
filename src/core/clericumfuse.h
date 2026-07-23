@@ -162,7 +162,7 @@ signals:
 private:
     static ClericumFuse* s_instance;  ///< 静态实例指针，用于 FUSE 回调
 
-    inline QMap<QString, QString> getFileList() const { ///< 虚拟文件名到真实路径的映射
+    [[nodiscard]] inline QMap<QString, QString> getFileList() const { ///< 虚拟文件名到真实路径的映射
         return m_storeManager->getFlatFileList();
     };
 

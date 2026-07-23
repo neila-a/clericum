@@ -10,8 +10,11 @@
 #include <QCommandLineParser>
 #include <commandhandler.h>
 
-using namespace std;
-using executor = function<CommandHandler::Result(QStringList)>;
+#include <functional>   // std::function
+
+// 命令执行器：接收位置参数，返回执行结果。
+// 用 std::function 替代裸 using namespace std，保持 Qt 优先且避免头文件污染。
+using executor = std::function<CommandHandler::Result(QStringList)>;
 
 /**
  * @class CommandParser
@@ -53,6 +56,7 @@ private:
 
     /**
      * @brief 判断一个 QStringList 是否由另一个 QStringList 开始。
+     * 使用 C++23 std::ranges::starts_with 实现。
      */
     static bool QStringListStartsWith(const QStringList& toCompare, const QStringList& starts);
 
