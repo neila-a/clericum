@@ -146,23 +146,26 @@ public:
      */
     Q_INVOKABLE Result executeBackupRemove(const QString& backupFile);
 
-private:
-
     /**
      * @brief 检查路径是否在已挂载的文件系统中
      * @param path 要检查的路径
-     * @return 是否在已挂载的文件系统中
+     * @return 是否处于某个挂载点之下
      *
      * 检查指定路径是否是某个挂载点的子路径。
+     * 公开以便 KDE 文件项操作插件等复用，避免在多处重复挂载点探测逻辑。
      */
     Q_INVOKABLE bool isPathMounted(const QString& path) const;
 
     /**
      * @brief 根据路径查找挂载点信息
      * @param path 文件路径
-     * @return 挂载点信息，如果不在任何挂载点中则返回 nullptr
+     * @return 挂载点信息，如果不在任何挂载点中则返回空的 MountInfo
+     *
+     * 公开以便 KDE 文件项操作插件等复用，避免在多处重复挂载点探测逻辑。
      */
     Q_INVOKABLE MountInfo findMountPoint(const QString& path) const;
+
+private:
 
     /**
      * @brief 从虚拟路径提取文件名

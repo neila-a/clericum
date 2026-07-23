@@ -28,8 +28,4 @@ target_include_directories(${GLOBAL_PROJECT_NAME}_${part}
         ${PROJECT_SOURCE_DIR}/src/core
 )
 
-target_compile_definitions(${GLOBAL_PROJECT_NAME}_${part} PRIVATE
-    _PROJECT_NAME="${GLOBAL_PROJECT_NAME}"
-    _PROJECT_VERSION="${GLOBAL_PROJECT_VERSION}"
-    _PROJECT_HOMEPAGE="${GLOBAL_PROJECT_HOMEPAGE}"
-)
+defineProjectInfo(${part})

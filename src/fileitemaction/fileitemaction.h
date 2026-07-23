@@ -4,13 +4,14 @@
  *
  * 这是一个 KDE/Dolphin 的 FileItemAction 插件，在文件管理器的右键菜单中
  * 为 clericum 提供快捷操作：
- * - 在 store 文件夹上：挂载（load）
+ * - 在任意普通（非 store、非挂载点）文件夹上：创建 store / 挂载（load）
  * - 在挂载点上：卸载（unload）
  * - 在挂载点内的文件上：创建备份 / 加载备份 / 删除备份
  *
  * 实际命令通过直接复用 clericum_core 中的 CommandHandler 在 Dolphin 进程内
- * 完成，避免启动独立进程调用 clericum_cli。executeLoad 内部会以守护进程方式
- * 挂载 FUSE（父进程正常返回），因此在进程内直接调用是安全的。
+ * 完成，挂载点探测也复用 CommandHandler::findMountPoint，避免重复实现。
+ * executeLoad 内部会以守护进程方式挂载 FUSE（父进程正常返回），因此在进程内
+ * 直接调用是安全的。
  */
 
 #pragma once
@@ -52,26 +53,24 @@ public:
 
 private:
     /**
-     * @brief 挂载点信息
-     */
-    struct MountInfo {
-        QString mountPath;   ///< 挂载点路径
-        QString storePath;   ///< store 路径（来自 .clericum-mount 标记文件）
-    };
-
-    /**
-     * @brief 逐级向上查找挂载点标记文件
-     * @param path 起始路径
-     * @return 挂载点信息（若不在任何挂载点中则均为空）
-     */
-    MountInfo findMountPoint(const QString& path) const;
-
-    /**
-     * @brief 挂载一个 store
-     * @param storePath store 文件夹路径
+     * @brief 选择 store 并挂载到指定文件夹
+     * @param mountPath 作为挂载点的目标文件夹路径
      * @param parentWidget 父窗口
+     *
+     * 在任意普通（非 store、非挂载点）文件夹上触发：弹出目录选择框让用户
+     * 选择要挂载的 store，再将其挂载到 mountPath。
      */
-    void loadStore(const QString& storePath, QWidget* parentWidget);
+    void mountStore(const QString& mountPath, QWidget* parentWidget);
+
+    /**
+     * @brief 在指定文件夹内创建新的 store
+     * @param parentDir 在其下创建 store 的父文件夹路径
+     * @param parentWidget 父窗口
+     *
+     * 在任意普通（非 store、非挂载点）文件夹上触发：弹出输入框让用户指定
+     * store 名称，再在 parentDir 下创建名为该名称的 store。
+     */
+    void createStore(const QString& parentDir, QWidget* parentWidget);
 
     /**
      * @brief 卸载一个挂载点

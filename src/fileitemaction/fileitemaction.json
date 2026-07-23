@@ -1,6 +1,5 @@
 {
     "KPlugin": {
-        "Id": "clericumfileitemaction",
         "Icon": "vault",
         "Name": "Clericum",
         "Name[zh_CN]": "Clericum",

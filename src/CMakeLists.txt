@@ -1,4 +1,4 @@
-function(defineProjectInfo)
+function(defineProjectInfo name)
     target_compile_definitions(${GLOBAL_PROJECT_NAME}_${name} PRIVATE
         _PROJECT_NAME="${GLOBAL_PROJECT_NAME}"
         _PROJECT_VERSION="${GLOBAL_PROJECT_VERSION}"
@@ -6,7 +6,7 @@ function(defineProjectInfo)
     )
 endfunction()
 function(complete name)
-    defineProjectInfo()
+    defineProjectInfo(${name})
     install(TARGETS ${GLOBAL_PROJECT_NAME}_${name}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
