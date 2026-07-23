@@ -43,6 +43,7 @@ rec {
                             qt6.qtdeclarative
                             kdePackages.kcoreaddons
                             kdePackages.ki18n
+                            kdePackages.kio
                             fuse3
                         ];
 
@@ -79,6 +80,7 @@ rec {
                         qt6.qtdeclarative
                         kdePackages.kcoreaddons
                         kdePackages.ki18n
+                        kdePackages.kio
                         kdePackages.kde-dev-scripts
                         fuse3
                     ];

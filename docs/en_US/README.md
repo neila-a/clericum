@@ -23,3 +23,8 @@ nix build
 Actually, the reason these items are listed here instead of in my personal To-Do list is that they won't be accomplished in the short term...
 
 - [ ] Implement the FileItemAction plugin.
+
+## New C++ Features?
+
+- Concept will not be used except there are enough highly-abstracted functions.
+- Modules will not be used except Qt supported it.

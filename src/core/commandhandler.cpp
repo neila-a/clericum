@@ -6,7 +6,7 @@
 #include "commandhandler.h"
 #include <QProcess>
 
-#include <algorithm>    // std::ranges::any_of
+#include <algorithm>    // std::ranges::contains
 #include <ranges>       // C++20 范围库
 
 CommandHandler::CommandHandler(QObject* parent)
@@ -18,48 +18,48 @@ CommandHandler::~CommandHandler() {
 
 CommandHandler::Result CommandHandler::executeCreate(const QString& path) {
     if (!validatePath(path)) {
-        return Result::fail(i18n("Invalid path: path %1 contains invalid characters", path));
+        return std::unexpected(i18n("Invalid path: path %1 contains invalid characters", path));
     }
 
     const QFileInfo info(path);
     if (info.exists()) {
-        return Result::fail(i18n("Path %1 already exists", path));
+        return std::unexpected(i18n("Path %1 already exists", path));
     }
 
     StoreManager manager;
     manager.setStorePath(path);
     if (!manager.create()) {
-        return Result::fail(i18n("Failed to create store at %1", path));
+        return std::unexpected(i18n("Failed to create store at %1", path));
     }
 
-    return Result::ok(i18n("Store created at %1", path));
+    return Result(i18n("Store created at %1", path));
 }
 
 CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     const QString& mountPath) {
     // 检查挂载点是否已存在
     if (isPathMounted(mountPath)) {
-        return Result::fail(i18n("Path %1 already mounted", mountPath));
+        return std::unexpected(i18n("Path %1 already mounted", mountPath));
     }
 
     // 验证 store 路径
     const QFileInfo storeInfo(storePath);
     if (!storeInfo.exists() || !storeInfo.isDir()) {
-        return Result::fail(i18n("Invalid store path %1", storePath));
+        return std::unexpected(i18n("Invalid store path %1", storePath));
     }
 
     // 验证 store 是否有效
     StoreManager manager;
     manager.setStorePath(storePath);
     if (!manager.isValidStore()) {
-        return Result::fail(i18n("%1 is not a valid store", storePath));
+        return std::unexpected(i18n("%1 is not a valid store", storePath));
     }
 
     // 创建挂载点目录
     QDir mountDir(mountPath);
     if (!mountDir.exists()) {
         if (!mountDir.mkpath(".")) {
-            return Result::fail(i18n("Failed to create mount directory at %1", mountPath));
+            return std::unexpected(i18n("Failed to create mount directory at %1", mountPath));
         }
     }
 
@@ -77,14 +77,16 @@ CommandHandler::Result CommandHandler::executeLoad(const QString& storePath,
     // 直接挂载
     fuse->mount();
 
-    return Result::fail(i18n("Unexpected situation: fuse->mount() didn't daemonize this program"));
+    return std::unexpected(i18n("Unexpected situation: fuse->mount() didn't daemonize this program"));
 }
 
 CommandHandler::Result CommandHandler::executeUnload(const QString& mountPath) {
     // 使用 fusermount 卸载
     QProcess proc;
     proc.start("fusermount3", { "-u", mountPath });
-    return { proc.waitForFinished() };
+    return proc.waitForFinished()
+        ? Result(QString())
+        : std::unexpected(QString(i18n("Failed to unload %1", mountPath)));
 }
 
 CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
@@ -95,13 +97,13 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     // 查找挂载点
     MountInfo mountInfo = findMountPoint(virtualPath);
     if (mountInfo.mountPath.isEmpty()) {
-        return Result::fail(i18n("Path %1 is not in mounted filesystem", virtualPath));
+        return std::unexpected(i18n("Path %1 is not in mounted filesystem", virtualPath));
     }
 
     // 检查备份名是否有效
     if (backupName.isEmpty() || backupName.contains('/') ||
         backupName.contains(separator) || backupName.startsWith('.')) {
-        return Result::fail(i18n("Invalid backup name %1", backupName));
+        return std::unexpected(i18n("Invalid backup name %1", backupName));
     }
 
     // 解析本源文件名
@@ -111,25 +113,24 @@ CommandHandler::Result CommandHandler::executeBackup(const QString& virtualPath,
     StoreManager storeManager;
     storeManager.setStorePath(mountInfo.storePath);
     if (!storeManager.sourceExists(sourceName)) {
-        return Result::fail(i18n("Source file %1 not found", sourceName));
+        return std::unexpected(i18n("Source file %1 not found", sourceName));
     }
 
-    // 检查备份名是否已存在，如果存在就先删除（C++20 std::ranges::any_of）
+    // 检查备份名是否已存在，如果存在就先删除（C++23 std::ranges::contains）
     auto sourceInfo = storeManager.getSource(sourceName);
-    if (std::ranges::any_of(sourceInfo.backups,
-        [&backupName](const BackupInfo& b) { return b.name == backupName; })) {
+    if (std::ranges::contains(sourceInfo.backups, backupName, &BackupInfo::name)) {
         warn(i18n("Backup %1 already exists", backupName));
         QFile::remove(QStringList({ sourceInfo.backupsPath, backupName }).join("/"));
     }
 
     // 创建备份
     if (!storeManager.createBackup(sourceName, backupName)) {
-        return Result::fail(i18n("Failed to create backup"));
+        return std::unexpected(i18n("Failed to create backup"));
     }
 
     const QString msg = i18n("Backup %1 created for %2", backupName, sourceName);
 
-    return Result::ok(msg);
+    return Result(msg);
 }
 
 CommandHandler::Result CommandHandler::executeBackupLoad(const QString& backupFile) {
@@ -139,7 +140,7 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& backupFi
     // 查找挂载点
     MountInfo mountInfo = findMountPoint(backupFile);
     if (mountInfo.mountPath.isEmpty()) {
-        return Result::fail(i18n("Path %1 is not in mounted filesystem", backupFile));
+        return std::unexpected(i18n("Path %1 is not in mounted filesystem", backupFile));
     }
 
     // 解析本源文件名
@@ -151,26 +152,25 @@ CommandHandler::Result CommandHandler::executeBackupLoad(const QString& backupFi
     StoreManager storeManager;
     storeManager.setStorePath(mountInfo.storePath);
     if (!storeManager.sourceExists(sourceName)) {
-        return Result::fail(i18n("Source file %1 not found", sourceName));
+        return std::unexpected(i18n("Source file %1 not found", sourceName));
     }
 
-    // 检查备份是否存在（C++20 std::ranges::any_of）
+    // 检查备份是否存在（C++23 std::ranges::contains）
     auto sourceInfo = storeManager.getSource(sourceName);
-    const bool backupExists = std::ranges::any_of(sourceInfo.backups,
-        [&backupName](const BackupInfo& b) { return b.name == backupName; });
+    const bool backupExists = std::ranges::contains(sourceInfo.backups, backupName, &BackupInfo::name);
 
     if (!backupExists) {
-        return Result::fail(i18n("Backup %1 not found", backupName));
+        return std::unexpected(i18n("Backup %1 not found", backupName));
     }
 
     // 从备份加载到 current
     if (!storeManager.loadBackup(sourceName, backupName)) {
-        return Result::fail(i18n("Failed to load backup %1", backupName));
+        return std::unexpected(i18n("Failed to load backup %1", backupName));
     }
 
     const QString msg = i18n("Backup %1 loaded to %2", backupName, sourceName);
 
-    return Result::ok(msg);
+    return Result(msg);
 }
 
 CommandHandler::Result CommandHandler::executeBackupRemove(const QString& backupFile) {
@@ -180,7 +180,7 @@ CommandHandler::Result CommandHandler::executeBackupRemove(const QString& backup
     // 查找挂载点
     MountInfo mountInfo = findMountPoint(backupFile);
     if (mountInfo.mountPath.isEmpty()) {
-        return Result::fail(i18n("Path %1 is not in mounted filesystem", backupFile));
+        return std::unexpected(i18n("Path %1 is not in mounted filesystem", backupFile));
     }
 
     // 解析本源文件名
@@ -192,26 +192,25 @@ CommandHandler::Result CommandHandler::executeBackupRemove(const QString& backup
     StoreManager storeManager;
     storeManager.setStorePath(mountInfo.storePath);
     if (!storeManager.sourceExists(sourceName)) {
-        return Result::fail(i18n("Source file %1 not found", sourceName));
+        return std::unexpected(i18n("Source file %1 not found", sourceName));
     }
 
-    // 检查备份是否存在（C++20 std::ranges::any_of）
+    // 检查备份是否存在（C++23 std::ranges::contains）
     auto sourceInfo = storeManager.getSource(sourceName);
-    const bool backupExists = std::ranges::any_of(sourceInfo.backups,
-        [&backupName](const BackupInfo& b) { return b.name == backupName; });
+    const bool backupExists = std::ranges::contains(sourceInfo.backups, backupName, &BackupInfo::name);
 
     if (!backupExists) {
-        return Result::fail(i18n("Backup %1 not found", backupName));
+        return std::unexpected(i18n("Backup %1 not found", backupName));
     }
 
     // 删除备份
     if (!storeManager.removeBackup(sourceName, backupName)) {
-        return Result::fail(i18n("Failed to remove backup %1", backupName));
+        return std::unexpected(i18n("Failed to remove backup %1", backupName));
     }
 
     const QString msg = i18n("Backup %1 removed from %2", backupName, sourceName);
 
-    return Result::ok(msg);
+    return Result(msg);
 }
 
 bool CommandHandler::isPathMounted(const QString& path) const {

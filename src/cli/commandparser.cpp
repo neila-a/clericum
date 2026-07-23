@@ -6,7 +6,9 @@
 #include "commandparser.h"
 #include <QRegularExpression>
 
-#include <ranges>   // C++20 范围库：std::ranges::starts_with
+#include <algorithm>   // C++23 std::ranges::starts_with / contains
+#include <ranges>      // C++20 范围库
+#include <utility>     // std::pair（fold_left 累加器）
 
 CommandParser::CommandParser(QObject* parent)
     : QObject{ parent } {
@@ -16,20 +18,23 @@ CommandParser::~CommandParser() {
 }
 
 void CommandParser::setApplication(const QString& description) {
-    QString commandsDescription;
-    QStringList commands;
-    for (const QStringList& name : m_commands.keys()) {
-        // 准备 commandsDescription
-        const commandInfo info = m_commands.value(name);
-        // 需要复制，避免修改原数据
-        QStringList arguments = info.arguments;
-        // "str" -> "<str>"
-        arguments.replaceInStrings(QRegularExpression("(^.*$)"), "<\\1>");
-        commandsDescription.append(QStringLiteral("\n%1 %2\t%3").arg(name.join(" "), arguments.join(" "), info.description));
+    // C++23 std::ranges::fold_left + Qt6 QMap::asKeyValueRange 结构化绑定遍历，
+    // 消除 m_commands.value(name) 的冗余二次查找。
+    const auto [commandsDescription, commands] = std::ranges::fold_left(
+        m_commands.asKeyValueRange(),
+        std::pair<QString, QStringList>{},
+        [](std::pair<QString, QStringList> acc, const auto& entry) {
+            const QStringList& name = entry.first;
+            const commandInfo& info = entry.second;
+            // 需要复制，避免修改原数据
+            QStringList arguments = info.arguments;
+            // "str" -> "<str>"
+            arguments.replaceInStrings(QRegularExpression("(^.*$)"), "<\\1>");
+            acc.first.append(QStringLiteral("\n%1 %2\t%3").arg(name.join(" "), arguments.join(" "), info.description));
+            acc.second.append(name.join(" "));
+            return acc;
+        });
 
-        // 准备 commands
-        commands.append(name.join(" "));
-    }
     QCommandLineParser::setApplicationDescription(i18n("%1\n\nCommands: %2").arg(description, commandsDescription));
     addPositionalArgument("command", i18n("The command to execute: %1").arg(commands.join(", ")));
 }
@@ -40,11 +45,10 @@ CommandParser& CommandParser::registerCommand(const QStringList& name, const QSt
 }
 
 bool CommandParser::QStringListStartsWith(const QStringList& toCompare, const QStringList& starts) {
-    // C++20 范围比较：对 toCompare 的前 starts.size() 个元素与 starts 做相等比较
-    if (starts.size() > toCompare.size()) {
-        return false;
-    }
-    return std::ranges::equal(toCompare | std::views::take(starts.size()), starts);
+    // 注：libstdc++ 15 尚未提供 C++23 的 std::ranges::starts_with，
+    // 这里用 C++20 std::ranges::mismatch 实现等价语义：starts 耗尽即表示 toCompare 以其开头。
+    const auto [it1, it2] = std::ranges::mismatch(toCompare, starts);
+    return it2 == std::ranges::end(starts);
 }
 
 int CommandParser::process(const QCoreApplication& app) {
@@ -60,9 +64,8 @@ int CommandParser::process(const QCoreApplication& app) {
     CommandHandler handler;
 
     bool foundCommand = false;
-    for (const QStringList& name : m_commands.keys()) {
+    for (const auto& [name, info] : m_commands.asKeyValueRange()) {
         if (QStringListStartsWith(arguments, name)) {
-            const commandInfo info = m_commands.value(name);
             const QStringList neededArguments = info.arguments;
 
             if (name.length() + neededArguments.length() > arguments.length()) {
@@ -83,14 +86,14 @@ int CommandParser::process(const QCoreApplication& app) {
         showHelp(-1);
     }
 
-    // 输出结果
-    if (result.success) {
-        if (!result.message.isEmpty()) {
-            information(result.message);
+    // 输出结果（std::expected：has_value 表示成功，error() 为失败消息）
+    if (result.has_value()) {
+        if (!result->isEmpty()) {
+            information(*result);
         }
         return 0;
     } else {
-        critical(i18n("Error: %1", result.message));
+        critical(i18n("Error: %1", result.error()));
         return -1;
     }
 }

@@ -13,6 +13,8 @@
 
 #include "clericumfuse.h"
 
+#include <expected>    // C++23 std::expected
+
  /**
   * @class CommandHandler
   * @brief 命令处理器类
@@ -54,25 +56,13 @@ class CommandHandler : public QObject {
 public:
     /**
      * @brief 命令执行结果
+     *
+     * 用 C++23 std::expected 表达"值或错误"：QString 既作成功消息（值）
+     * 也作失败消息（错误），与原有的 {bool success, QString message} 等价，
+     * 但可借助 monadic 操作（and_then/or_else/transform）链式处理。
+     * QString 可移动，满足 std::expected 的要求。
      */
-    struct Result {
-        bool success;         ///< 是否成功
-        /**
-         * @brief 结果消息
-         * 已经本地化了的。
-         */
-        QString message;
-
-        /** @brief 成功结果 */
-        [[nodiscard]] static Result ok(const QString& msg = QString()) {
-            return { true, msg };
-        }
-
-        /** @brief 失败结果 */
-        [[nodiscard]] static Result fail(const QString& msg) {
-            return { false, msg };
-        }
-    };
+    using Result = std::expected<QString, QString>;
 
     /**
      * @brief 挂载点信息

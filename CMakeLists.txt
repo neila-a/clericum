@@ -16,6 +16,9 @@ project(${GLOBAL_PROJECT_NAME}
     HOMEPAGE_URL ${GLOBAL_PROJECT_HOMEPAGE}
 )
 
+# 让 kcoreaddons_add_plugin 生成可加载的共享模块插件（默认 OFF 会编成静态库且不安装）。
+set(BUILD_SHARED_LIBS ON)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

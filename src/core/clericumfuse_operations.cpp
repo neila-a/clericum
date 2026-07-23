@@ -214,8 +214,7 @@ int ClericumFuse::fuseRead(const char* path, char* buf, size_t size,
     if (pathStr == MOUNT_MARKER_FILE) {
         const QByteArray storePathData = s_instance->storePath().toUtf8();
         if (offset < storePathData.size()) {
-            const qint64 avail = std::min<qint64>(
-                storePathData.size() - offset,
+            const qint64 avail = qMin(storePathData.size() - offset,
                 static_cast<qint64>(outBuf.size()));
             std::ranges::copy(storePathData.constData() + offset,
                 storePathData.constData() + offset + avail,

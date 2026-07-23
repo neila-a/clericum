@@ -56,7 +56,8 @@ private:
 
     /**
      * @brief 判断一个 QStringList 是否由另一个 QStringList 开始。
-     * 使用 C++23 std::ranges::starts_with 实现。
+     * 用 C++20 std::ranges::mismatch 实现 starts_with 语义
+     * （libstdc++ 15 尚未提供 C++23 的 std::ranges::starts_with）。
      */
     static bool QStringListStartsWith(const QStringList& toCompare, const QStringList& starts);
 
