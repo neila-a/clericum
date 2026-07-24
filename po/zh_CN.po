@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: clericum 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/neila-a/clericum/issues\n"
-"POT-Creation-Date: 2026-04-29 20:59+0800\n"
+"POT-Creation-Date: 2026-07-24 14:10+0800\n"
 "PO-Revision-Date: 2026-04-25 20:07+0800\n"
 "Last-Translator: Neila <neilaspace@outlook.com>\n"
 "Language-Team: zh_CN <neilaspace@outlook.com>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: cli/commandparser.cpp:31
+#: cli/commandparser.cpp:38
 msgid ""
 "%1\n"
 "\n"
@@ -27,19 +27,19 @@ msgstr ""
 "\n"
 "命令：%2"
 
-#: cli/commandparser.cpp:32
+#: cli/commandparser.cpp:39
 msgid "The command to execute: %1"
 msgstr "要执行的命令：%1"
 
-#: cli/commandparser.cpp:68
+#: cli/commandparser.cpp:72
 msgid "%1 requires %2 arguments"
 msgstr "%1 需要 %2 参数"
 
-#: cli/commandparser.cpp:81
+#: cli/commandparser.cpp:85
 msgid "Unknown command %1"
 msgstr "未知的命令 %1"
 
-#: cli/commandparser.cpp:92
+#: cli/commandparser.cpp:96
 msgid "Error: %1"
 msgstr "错误：%1"
 
@@ -111,96 +111,101 @@ msgstr "在 %2 挂载了 %1"
 msgid "FUSE exited with code %1"
 msgstr "用户空间文件系统以 %1 的代码退出了"
 
-#: core/commandhandler.cpp:18
+#: core/commandhandler.cpp:21
 msgid "Invalid path: path %1 contains invalid characters"
 msgstr "非法路径：路径 %1 包含非法字符"
 
-#: core/commandhandler.cpp:23 core/storemanager.cpp:27
+#: core/commandhandler.cpp:26 core/storemanager.cpp:30
 msgid "Path %1 already exists"
 msgstr "路径 %1 已存在"
 
-#: core/commandhandler.cpp:29
-msgid "Failed to create store at %1"
+#: core/commandhandler.cpp:32
+msgid "Failed to Create store here at %1"
 msgstr "未能在 %1 创建仓库"
 
-#: core/commandhandler.cpp:32
+#: core/commandhandler.cpp:35
 msgid "Store created at %1"
 msgstr "在 %1 创建了仓库"
 
-#: core/commandhandler.cpp:39
+#: core/commandhandler.cpp:42
 msgid "Path %1 already mounted"
 msgstr "路径 %1 已经被挂载了"
 
-#: core/commandhandler.cpp:45
+#: core/commandhandler.cpp:48
 msgid "Invalid store path %1"
 msgstr "非法的仓库路径 %1"
 
-#: core/commandhandler.cpp:52
+#: core/commandhandler.cpp:55
 msgid "%1 is not a valid store"
 msgstr "%1 不是一个合法的仓库"
 
-#: core/commandhandler.cpp:59
+#: core/commandhandler.cpp:62
 msgid "Failed to create mount directory at %1"
 msgstr "未能在 %1 创建挂载目录"
 
-#: core/commandhandler.cpp:71
+#: core/commandhandler.cpp:74
 msgid "FUSE error: %1"
 msgstr "用户空间文件系统错误：%1"
 
-#: core/commandhandler.cpp:77
+#: core/commandhandler.cpp:80
 msgid "Unexpected situation: fuse->mount() didn't daemonize this program"
 msgstr "出乎意料的情况：fuse->mount() 未能守护进程化此程序"
 
-#: core/commandhandler.cpp:95 core/commandhandler.cpp:140
-#: core/commandhandler.cpp:186
+#: core/commandhandler.cpp:89
+#, fuzzy
+msgid "Failed to unload %1"
+msgstr "未能加载备份 %1"
+
+#: core/commandhandler.cpp:100 core/commandhandler.cpp:143
+#: core/commandhandler.cpp:183
 msgid "Path %1 is not in mounted filesystem"
 msgstr "路径 %1 不在挂载了的文件系统中"
 
-#: core/commandhandler.cpp:101
+#: core/commandhandler.cpp:106
 msgid "Invalid backup name %1"
 msgstr "非法的备份名 %1"
 
-#: core/commandhandler.cpp:111 core/commandhandler.cpp:152
-#: core/commandhandler.cpp:198
+#: core/commandhandler.cpp:116 core/commandhandler.cpp:155
+#: core/commandhandler.cpp:195
 msgid "Source file %1 not found"
 msgstr "源文件 %1 未找到"
 
-#: core/commandhandler.cpp:118
+#: core/commandhandler.cpp:122
 msgid "Backup %1 already exists"
 msgstr "备份 %1 已存在"
 
-#: core/commandhandler.cpp:125
+#: core/commandhandler.cpp:128
 msgid "Failed to create backup"
 msgstr "未能创建备份"
 
-#: core/commandhandler.cpp:128
+#: core/commandhandler.cpp:131
 msgid "Backup %1 created for %2"
 msgstr "为 %2 创建了备份 %1"
 
-#: core/commandhandler.cpp:166 core/commandhandler.cpp:212
-#: core/storemanager.cpp:219 core/storemanager.cpp:240
+#: core/commandhandler.cpp:163 core/commandhandler.cpp:203
+#: core/storemanager.cpp:211 core/storemanager.cpp:226
 msgid "Backup %1 not found"
 msgstr "备份 %1 未找到"
 
-#: core/commandhandler.cpp:171
+#: core/commandhandler.cpp:168
 msgid "Failed to load backup %1"
 msgstr "未能加载备份 %1"
 
-#: core/commandhandler.cpp:174
+#: core/commandhandler.cpp:171
 msgid "Backup %1 loaded to %2"
 msgstr "备份 %1 加载到了 %2"
 
-#: core/commandhandler.cpp:217
+#: core/commandhandler.cpp:208
 #, fuzzy
 msgid "Failed to remove backup %1"
 msgstr "未能加载备份 %1"
 
-#: core/commandhandler.cpp:220
+#: core/commandhandler.cpp:211
 #, fuzzy
 msgid "Backup %1 removed from %2"
 msgstr "为 %2 创建了备份 %1"
 
-#: core/commandhandler.cpp:249
+#: core/commandhandler.cpp:240
 msgid "Failed to open mount marker file %1"
 msgstr "未能打开挂载标记文件 %1"
 
@@ -221,44 +226,83 @@ msgstr "未能创建 files 目录"
 msgid "Failed to create backups directory"
 msgstr "未能创建 backups 目录"
 
-#: core/storemanager.cpp:66
+#: core/storemanager.cpp:64
 msgid "Not a dir"
 msgstr "不是一个目录"
 
-#: core/storemanager.cpp:73
+#: core/storemanager.cpp:71
 msgid "No metafile"
 msgstr "没有元文件"
 
-#: core/storemanager.cpp:85
+#: core/storemanager.cpp:83
 msgid "No or invaild files or backups folder"
 msgstr "没有或不合法的 files 或 backups 文件夹"
 
-#: core/storemanager.cpp:152
+#: core/storemanager.cpp:150
 msgid "Failed to create files directory %1"
 msgstr "未能创建 files 目录 %1"
 
-#: core/storemanager.cpp:160
+#: core/storemanager.cpp:158
 msgid "Failed to create source file %1"
 msgstr "未能创建源文件 %1"
 
-#: core/storemanager.cpp:167
+#: core/storemanager.cpp:165
 msgid "Failed to create backups directory %1"
 msgstr "未能创建 backups 目录 %1"
 
-#: core/storemanager.cpp:177 core/storemanager.cpp:197
-#: core/storemanager.cpp:226
+#: core/storemanager.cpp:175 core/storemanager.cpp:195
+#: core/storemanager.cpp:218
 msgid "Source %1 not found"
 msgstr "源 %1 未找到"
 
-#: core/storemanager.cpp:187
+#: core/storemanager.cpp:185
 msgid "Failed to create backup at %1"
 msgstr "未能在 %1 创建备份"
 
-#: core/storemanager.cpp:213
+#: core/storemanager.cpp:207
 #, fuzzy
 msgid "Failed to remove backup file %1"
 msgstr "未能在 %1 创建备份"
 
-#: core/storemanager.cpp:247
+#: core/storemanager.cpp:233
 msgid "Failed to load backup %1 to current %2"
 msgstr "未能加载备份 %1 到本源文件 %2"
+
+#: fileitemaction/fileitemaction.cpp:88
+#, fuzzy
+msgid "Create store here"
+msgstr "在此创建新仓库"
+
+#: fileitemaction/fileitemaction.cpp:98
+#, fuzzy
+msgid "Load store"
+msgstr "加载仓库"
+
+#: fileitemaction/fileitemaction.cpp:103
+#, fuzzy
+msgid "Select store to mount into %1"
+msgstr "选择要挂载到 %1 到仓库"
+
+#: fileitemaction/fileitemaction.cpp:114
+msgid "Unload store"
+msgstr "卸载仓库"
+
+#: fileitemaction/fileitemaction.cpp:132
+#, fuzzy
+msgid "Load backup"
+msgstr "加载备份"
+
+#: fileitemaction/fileitemaction.cpp:143
+#, fuzzy
+msgid "Remove backup"
+msgstr "删除备份"
+
+#: fileitemaction/fileitemaction.cpp:154 fileitemaction/fileitemaction.cpp:161
+#, fuzzy
+msgid "Create backup"
+msgstr "创建备份"
+
+#: fileitemaction/fileitemaction.cpp:161
+#, fuzzy
+msgid "Backup name:"
+msgstr "备份名："

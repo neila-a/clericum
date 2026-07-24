@@ -1,6 +1,6 @@
 # clericum
 
-[English](/docs/en_US/README.md) | 中文普通话大陆简体
+[English](/docs/en_US/README.md) | 大陆简体中文
 
 一个基于 FUSE 的文件备份工具。
 
@@ -23,8 +23,3 @@ nix build
 其实说这些事项之所以会被列在这里而不是我的个人待办是因为它们在短期内不会被实现……
 
 - [ ] 实现 FileItemAction 插件。
-
-## 新的 C++ 特性？
-
-- 概念只在有足够的高级抽象函数时才会使用。
-- 模块在 Qt 支持后才会使用。

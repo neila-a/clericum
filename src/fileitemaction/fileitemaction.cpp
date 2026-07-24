@@ -77,11 +77,15 @@ QList<QAction*> ClericumFileItemAction::actions(
 
     QList<QAction*> actions;
 
+    QAction* separatorAction = new QAction(parentWidget);
+    separatorAction->setSeparator(true);
+    actions.append(separatorAction);
+
     // 在任意普通（非 store、非挂载点）文件夹上：提供创建 store 与挂载操作。
     if (isDir && !isStore && !isMountPoint) {
         QAction* createStoreAction = new QAction(
             QIcon::fromTheme("folder-new"),
-            i18n("Create store"),
+            i18n("Create store here"),
             parentWidget
         );
         connect(createStoreAction, &QAction::triggered, this,
@@ -107,7 +111,7 @@ QList<QAction*> ClericumFileItemAction::actions(
         // 在挂载点上：提供卸载操作
         QAction* unloadAction = new QAction(
             QIcon::fromTheme("media-eject"),
-            i18n("Unload"),
+            i18n("Unload store"),
             parentWidget
         );
         connect(unloadAction, &QAction::triggered, this,

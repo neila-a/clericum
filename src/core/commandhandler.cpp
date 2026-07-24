@@ -29,7 +29,7 @@ CommandHandler::Result CommandHandler::executeCreate(const QString& path) {
     StoreManager manager;
     manager.setStorePath(path);
     if (!manager.create()) {
-        return std::unexpected(i18n("Failed to create store at %1", path));
+        return std::unexpected(i18n("Failed to Create store here at %1", path));
     }
 
     return Result(i18n("Store created at %1", path));

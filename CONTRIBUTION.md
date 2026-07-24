@@ -1,4 +1,1 @@
-# Code style
-
-Use Javadoc.
-Using Markdown is better.
+docs/en_US/CONTRIBUTION.md
