@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
             executor(Load(arguments[0], arguments[1]))
         )
         .registerCommand(
-            { "store", "Unload store" },
+            { "store", "unload" },
             { i18n("path") },
             i18n("Unmount a filesystem"),
             executor(Unload(arguments[0]))

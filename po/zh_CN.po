@@ -3,13 +3,12 @@
 # This file is distributed under the same license as the clericum package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: clericum 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/neila-a/clericum/issues\n"
 "POT-Creation-Date: 2026-07-24 14:10+0800\n"
-"PO-Revision-Date: 2026-04-25 20:07+0800\n"
+"PO-Revision-Date: 2026-07-24 14:10+0800\n"
 "Last-Translator: Neila <neilaspace@outlook.com>\n"
 "Language-Team: zh_CN <neilaspace@outlook.com>\n"
 "Language: zh_CN\n"
@@ -152,7 +151,6 @@ msgid "Unexpected situation: fuse->mount() didn't daemonize this program"
 msgstr "出乎意料的情况：fuse->mount() 未能守护进程化此程序"
 
 #: core/commandhandler.cpp:89
-#, fuzzy
 msgid "Failed to unload %1"
 msgstr "未能加载备份 %1"
 
@@ -196,12 +194,10 @@ msgid "Backup %1 loaded to %2"
 msgstr "备份 %1 加载到了 %2"
 
 #: core/commandhandler.cpp:208
-#, fuzzy
 msgid "Failed to remove backup %1"
 msgstr "未能加载备份 %1"
 
 #: core/commandhandler.cpp:211
-#, fuzzy
 msgid "Backup %1 removed from %2"
 msgstr "为 %2 创建了备份 %1"
 
@@ -214,7 +210,6 @@ msgid "Failed to create directory %1"
 msgstr "未能创建目录 %1"
 
 #: core/storemanager.cpp:41
-#, fuzzy
 msgid "Failed to create marker file %1"
 msgstr "未能创建标记文件"
 
@@ -260,7 +255,6 @@ msgid "Failed to create backup at %1"
 msgstr "未能在 %1 创建备份"
 
 #: core/storemanager.cpp:207
-#, fuzzy
 msgid "Failed to remove backup file %1"
 msgstr "未能在 %1 创建备份"
 
@@ -269,17 +263,14 @@ msgid "Failed to load backup %1 to current %2"
 msgstr "未能加载备份 %1 到本源文件 %2"
 
 #: fileitemaction/fileitemaction.cpp:88
-#, fuzzy
 msgid "Create store here"
 msgstr "在此创建新仓库"
 
 #: fileitemaction/fileitemaction.cpp:98
-#, fuzzy
 msgid "Load store"
 msgstr "加载仓库"
 
 #: fileitemaction/fileitemaction.cpp:103
-#, fuzzy
 msgid "Select store to mount into %1"
 msgstr "选择要挂载到 %1 到仓库"
 
@@ -288,21 +279,17 @@ msgid "Unload store"
 msgstr "卸载仓库"
 
 #: fileitemaction/fileitemaction.cpp:132
-#, fuzzy
 msgid "Load backup"
 msgstr "加载备份"
 
 #: fileitemaction/fileitemaction.cpp:143
-#, fuzzy
 msgid "Remove backup"
 msgstr "删除备份"
 
 #: fileitemaction/fileitemaction.cpp:154 fileitemaction/fileitemaction.cpp:161
-#, fuzzy
 msgid "Create backup"
 msgstr "创建备份"
 
 #: fileitemaction/fileitemaction.cpp:161
-#, fuzzy
 msgid "Backup name:"
 msgstr "备份名："
