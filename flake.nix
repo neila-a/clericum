@@ -1,4 +1,4 @@
-rec {
+{
     description = "A FUSE-based file backup and virtual filesystem tool.";
 
     inputs = {
