@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: clericum 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/neila-a/clericum/issues\n"
-"POT-Creation-Date: 2026-07-24 14:10+0800\n"
+"POT-Creation-Date: 2026-07-24 14:40+0800\n"
 "PO-Revision-Date: 2026-07-24 14:10+0800\n"
 "Last-Translator: Neila <neilaspace@outlook.com>\n"
 "Language-Team: zh_CN <neilaspace@outlook.com>\n"
@@ -27,6 +27,10 @@ msgstr ""
 "命令：%2"
 
 #: cli/commandparser.cpp:39
+msgid "command"
+msgstr "命令"
+
+#: cli/commandparser.cpp:39
 msgid "The command to execute: %1"
 msgstr "要执行的命令：%1"
 
@@ -44,7 +48,7 @@ msgstr "错误：%1"
 
 #: cli/main.cpp:54
 msgid "description"
-msgstr "一个基于FUSE的文件备份工具。"
+msgstr "一个基于用户空间文件系统的文件备份工具。"
 
 #: cli/main.cpp:80 cli/main.cpp:86 cli/main.cpp:92 cli/main.cpp:100
 msgid "path"
@@ -119,7 +123,8 @@ msgid "Path %1 already exists"
 msgstr "路径 %1 已存在"
 
 #: core/commandhandler.cpp:32
-msgid "Failed to Create store here at %1"
+#, fuzzy
+msgid "Failed to create store at %1"
 msgstr "未能在 %1 创建仓库"
 
 #: core/commandhandler.cpp:35
@@ -262,34 +267,34 @@ msgstr "未能在 %1 创建备份"
 msgid "Failed to load backup %1 to current %2"
 msgstr "未能加载备份 %1 到本源文件 %2"
 
-#: fileitemaction/fileitemaction.cpp:88
+#: fileitemaction/fileitemaction.cpp:79
 msgid "Create store here"
 msgstr "在此创建新仓库"
 
-#: fileitemaction/fileitemaction.cpp:98
+#: fileitemaction/fileitemaction.cpp:89
 msgid "Load store"
 msgstr "加载仓库"
 
-#: fileitemaction/fileitemaction.cpp:103
+#: fileitemaction/fileitemaction.cpp:94
 msgid "Select store to mount into %1"
 msgstr "选择要挂载到 %1 到仓库"
 
-#: fileitemaction/fileitemaction.cpp:114
+#: fileitemaction/fileitemaction.cpp:105
 msgid "Unload store"
 msgstr "卸载仓库"
 
-#: fileitemaction/fileitemaction.cpp:132
+#: fileitemaction/fileitemaction.cpp:123
 msgid "Load backup"
 msgstr "加载备份"
 
-#: fileitemaction/fileitemaction.cpp:143
+#: fileitemaction/fileitemaction.cpp:134
 msgid "Remove backup"
 msgstr "删除备份"
 
-#: fileitemaction/fileitemaction.cpp:154 fileitemaction/fileitemaction.cpp:161
+#: fileitemaction/fileitemaction.cpp:145 fileitemaction/fileitemaction.cpp:152
 msgid "Create backup"
 msgstr "创建备份"
 
-#: fileitemaction/fileitemaction.cpp:161
+#: fileitemaction/fileitemaction.cpp:152
 msgid "Backup name:"
 msgstr "备份名："

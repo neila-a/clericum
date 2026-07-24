@@ -65,7 +65,7 @@ rec {
                             homepage = homepage;
                             license = pkgs.lib.licenses.gpl3Plus;
                             platforms = pkgs.lib.platforms.linux;
-                            mainProgram = name + "_app";
+                            mainProgram = name + "_cli";
                         };
                     };
                 };

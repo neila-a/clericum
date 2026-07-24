@@ -17,9 +17,5 @@ nix build
 ## Known Issues
 
 - Absolute paths must be used in some commands.
-
-## To-Do
-
-Actually, the reason these items are listed here instead of in my personal To-Do list is that they won't be accomplished in the short term...
-
-- [ ] Implement the FileItemAction plugin.
+- In FileItemAction, loading the store can cause Dolphin to freeze.  
+  But the store still loads correctly.

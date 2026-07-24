@@ -3,11 +3,12 @@
 # This file is distributed under the same license as the clericum package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: clericum 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/neila-a/clericum/issues\n"
-"POT-Creation-Date: 2026-07-24 14:10+0800\n"
+"POT-Creation-Date: 2026-07-24 14:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,6 +22,10 @@ msgid ""
 "%1\n"
 "\n"
 "Commands: %2"
+msgstr ""
+
+#: cli/commandparser.cpp:39
+msgid "command"
 msgstr ""
 
 #: cli/commandparser.cpp:39
@@ -116,7 +121,7 @@ msgid "Path %1 already exists"
 msgstr ""
 
 #: core/commandhandler.cpp:32
-msgid "Failed to Create store here at %1"
+msgid "Failed to create store at %1"
 msgstr ""
 
 #: core/commandhandler.cpp:35
@@ -259,34 +264,34 @@ msgstr ""
 msgid "Failed to load backup %1 to current %2"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:88
+#: fileitemaction/fileitemaction.cpp:79
 msgid "Create store here"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:98
+#: fileitemaction/fileitemaction.cpp:89
 msgid "Load store"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:103
+#: fileitemaction/fileitemaction.cpp:94
 msgid "Select store to mount into %1"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:114
+#: fileitemaction/fileitemaction.cpp:105
 msgid "Unload store"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:132
+#: fileitemaction/fileitemaction.cpp:123
 msgid "Load backup"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:143
+#: fileitemaction/fileitemaction.cpp:134
 msgid "Remove backup"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:154 fileitemaction/fileitemaction.cpp:161
+#: fileitemaction/fileitemaction.cpp:145 fileitemaction/fileitemaction.cpp:152
 msgid "Create backup"
 msgstr ""
 
-#: fileitemaction/fileitemaction.cpp:161
+#: fileitemaction/fileitemaction.cpp:152
 msgid "Backup name:"
 msgstr ""

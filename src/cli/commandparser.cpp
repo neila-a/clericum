@@ -36,7 +36,7 @@ void CommandParser::setApplication(const QString& description) {
         });
 
     QCommandLineParser::setApplicationDescription(i18n("%1\n\nCommands: %2").arg(description, commandsDescription));
-    addPositionalArgument("command", i18n("The command to execute: %1").arg(commands.join(", ")));
+    addPositionalArgument(i18n("command"), i18n("The command to execute: %1").arg(commands.join(", ")));
 }
 
 CommandParser& CommandParser::registerCommand(const QStringList& name, const QStringList& arguments, const QString& description, executor executorFunction) {
