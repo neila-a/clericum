@@ -24,22 +24,29 @@
 #include "clericumfuse.h"
 #include "commandhandler.h"
 
-// 本文件只用到 StoreManager / CommandHandler 的 API，不需要这些日志宏；
-// 它们在后续头文件中可能引发命名冲突，故在此全部取消。
-#undef log
-#undef critical
-#undef information
-#undef warn
-
 K_PLUGIN_CLASS_WITH_JSON(ClericumFileItemAction, "fileitemaction.json")
+
+ClericumFileItemAction* ClericumFileItemAction::s_instance = nullptr;
 
 ClericumFileItemAction::ClericumFileItemAction(QObject* parent,
     const QVariantList& args)
     : KAbstractFileItemActionPlugin(parent) {
+    s_instance = this;
+    originalHandler = qInstallMessageHandler(ClericumFileItemAction::logToDolphin);
     Q_UNUSED(args);
 }
 
 ClericumFileItemAction::~ClericumFileItemAction() {
+    s_instance = nullptr;
+    qInstallMessageHandler(originalHandler);
+}
+
+void ClericumFileItemAction::logToDolphin(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+    s_instance->originalHandler(type, context, msg);
+
+    if (type == QtCriticalMsg) {
+        s_instance->error(msg);
+    }
 }
 
 QList<QAction*> ClericumFileItemAction::actions(
@@ -54,7 +61,7 @@ QList<QAction*> ClericumFileItemAction::actions(
         return {};
     }
 
-    const QString path = urls.at(0).toLocalFile();
+    const QString path = urls[0].toLocalFile();
     if (path.isEmpty()) {
         return {};
     }
@@ -74,7 +81,7 @@ QList<QAction*> ClericumFileItemAction::actions(
     if (isDir && !isStore && !isMountPoint) {
         QAction* createStoreAction = new QAction(
             QIcon::fromTheme("folder-new"),
-            i18n("Create store…"),
+            i18n("Create store"),
             parentWidget
         );
         connect(createStoreAction, &QAction::triggered, this,
@@ -84,7 +91,7 @@ QList<QAction*> ClericumFileItemAction::actions(
         actions.append(createStoreAction);
 
         QAction* loadAction = new QAction(
-            QIcon::fromTheme("media-mount"), i18n("Load…"), parentWidget);
+            QIcon::fromTheme("media-mount"), i18n("Load store"), parentWidget);
         connect(loadAction, &QAction::triggered, this,
             [this, path, parentWidget]() {
                 // 当前文件夹作为挂载点，弹出目录选择框以选择要挂载的 store。
@@ -140,7 +147,7 @@ QList<QAction*> ClericumFileItemAction::actions(
         } else {
             QAction* createBackupAction = new QAction(
                 QIcon::fromTheme("backup"),
-                i18n("Create backup…"),
+                i18n("Create backup"),
                 parentWidget
             );
             connect(createBackupAction, &QAction::triggered, this,
@@ -157,12 +164,6 @@ QList<QAction*> ClericumFileItemAction::actions(
             actions.append(createBackupAction);
         }
     }
-            QAction* action = new QAction(
-                QIcon::fromTheme("backup"),
-                i18n("Create backup…"),
-                parentWidget
-            );
-            actions.append(action);
 
     return actions;
 }

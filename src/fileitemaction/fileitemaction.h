@@ -47,4 +47,14 @@ public:
      */
     QList<QAction*> actions(const KFileItemListProperties& fileItemInfos,
         QWidget* parentWidget) override;
+
+    /**
+     * @brief 捕获默认的 critical 信息。
+     */
+    static void logToDolphin(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+
+private:
+    static ClericumFileItemAction* s_instance;
+
+    QtMessageHandler originalHandler = nullptr;
 };
