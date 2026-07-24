@@ -19,9 +19,6 @@
 #include <KAbstractFileItemActionPlugin>
 #include <KFileItemListProperties>
 
-class QAction;
-class QWidget;
-
 /**
  * @class ClericumFileItemAction
  * @brief clericum 的 KDE 文件项操作插件
@@ -50,39 +47,4 @@ public:
      */
     QList<QAction*> actions(const KFileItemListProperties& fileItemInfos,
         QWidget* parentWidget) override;
-
-private:
-    /**
-     * @brief 选择 store 并挂载到指定文件夹
-     * @param mountPath 作为挂载点的目标文件夹路径
-     * @param parentWidget 父窗口
-     *
-     * 在任意普通（非 store、非挂载点）文件夹上触发：弹出目录选择框让用户
-     * 选择要挂载的 store，再将其挂载到 mountPath。
-     */
-    void mountStore(const QString& mountPath, QWidget* parentWidget);
-
-    /**
-     * @brief 在指定文件夹内创建新的 store
-     * @param parentDir 在其下创建 store 的父文件夹路径
-     * @param parentWidget 父窗口
-     *
-     * 在任意普通（非 store、非挂载点）文件夹上触发：弹出输入框让用户指定
-     * store 名称，再在 parentDir 下创建名为该名称的 store。
-     */
-    void createStore(const QString& parentDir, QWidget* parentWidget);
-
-    /**
-     * @brief 卸载一个挂载点
-     * @param mountPath 挂载点路径
-     * @param parentWidget 父窗口
-     */
-    void unloadMount(const QString& mountPath, QWidget* parentWidget);
-
-    /**
-     * @brief 为指定虚拟文件创建备份
-     * @param virtualPath 挂载点内的虚拟文件路径
-     * @param parentWidget 父窗口
-     */
-    void createBackup(const QString& virtualPath, QWidget* parentWidget);
 };

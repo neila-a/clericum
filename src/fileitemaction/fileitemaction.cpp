@@ -3,8 +3,8 @@
  * @brief ClericumFileItemAction 类实现
  */
 
-// 插件自身的翻译域，使用项目名（与 CLI / catalog 一致）。
-// 必须在包含任何 KDE i18n 头文件之前定义。
+ // 插件自身的翻译域，使用项目名（与 CLI / catalog 一致）。
+ // 必须在包含任何 KDE i18n 头文件之前定义。
 #define TRANSLATION_DOMAIN _PROJECT_NAME
 
 #include "fileitemaction.h"
@@ -68,32 +68,48 @@ QList<QAction*> ClericumFileItemAction::actions(
     const bool isMountPoint = isDir
         && QDir(path).exists(MOUNT_MARKER_FILE);
 
-    QList<QAction*> result;
+    QList<QAction*> actions;
 
     // 在任意普通（非 store、非挂载点）文件夹上：提供创建 store 与挂载操作。
     if (isDir && !isStore && !isMountPoint) {
         QAction* createStoreAction = new QAction(
-            QIcon::fromTheme("folder-new"), i18n("Create store…"), parentWidget);
+            QIcon::fromTheme("folder-new"),
+            i18n("Create store…"),
+            parentWidget
+        );
         connect(createStoreAction, &QAction::triggered, this,
-            [this, path, parentWidget]() { createStore(path, parentWidget); });
-        result.append(createStoreAction);
+            [this, path]() {
+                CommandHandler().executeCreate(path);
+            });
+        actions.append(createStoreAction);
 
         QAction* loadAction = new QAction(
             QIcon::fromTheme("media-mount"), i18n("Load…"), parentWidget);
         connect(loadAction, &QAction::triggered, this,
-            [this, path, parentWidget]() { mountStore(path, parentWidget); });
-        result.append(loadAction);
+            [this, path, parentWidget]() {
+                // 当前文件夹作为挂载点，弹出目录选择框以选择要挂载的 store。
+                const QString storePath = QFileDialog::getExistingDirectory(parentWidget,
+                    i18n("Select store to mount into %1", path), path);
+                if (storePath.isEmpty()) {
+                    return;
+                }
+                CommandHandler().executeLoad(storePath, path);
+            });
+        actions.append(loadAction);
     } else if (isMountPoint) {
         // 在挂载点上：提供卸载操作
         QAction* unloadAction = new QAction(
-            QIcon::fromTheme("media-eject"), i18n("Unload"), parentWidget);
+            QIcon::fromTheme("media-eject"),
+            i18n("Unload"),
+            parentWidget
+        );
         connect(unloadAction, &QAction::triggered, this,
-            [this, path, parentWidget]() { unloadMount(path, parentWidget); });
-        result.append(unloadAction);
-    }
-
-    // 在挂载点内的文件上：提供备份相关操作
-    if (!mount.storePath.isEmpty() && !isDir) {
+            [this, path]() {
+                CommandHandler().executeUnload(path);
+            });
+        actions.append(unloadAction);
+    } else if (!mount.storePath.isEmpty() && !isDir) {
+        // 在挂载点内的文件上：提供备份相关操作
         const QString fileName = info.fileName();
         StoreManager manager;
         manager.setStorePath(mount.storePath);
@@ -102,76 +118,53 @@ QList<QAction*> ClericumFileItemAction::actions(
         if (manager.isBackupFile(fileName)) {
             QAction* loadBackupAction = new QAction(
                 QIcon::fromTheme("document-open"),
-                i18n("Load backup"), parentWidget);
+                i18n("Load backup"),
+                parentWidget
+            );
             connect(loadBackupAction, &QAction::triggered, this,
                 [this, virtualPath]() {
                     CommandHandler().executeBackupLoad(virtualPath);
                 });
-            result.append(loadBackupAction);
+            actions.append(loadBackupAction);
 
             QAction* removeBackupAction = new QAction(
                 QIcon::fromTheme("delete"),
-                i18n("Remove backup"), parentWidget);
+                i18n("Remove backup"),
+                parentWidget
+            );
             connect(removeBackupAction, &QAction::triggered, this,
                 [this, virtualPath]() {
                     CommandHandler().executeBackupRemove(virtualPath);
                 });
-            result.append(removeBackupAction);
+            actions.append(removeBackupAction);
         } else {
             QAction* createBackupAction = new QAction(
                 QIcon::fromTheme("backup"),
-                i18n("Create backup…"), parentWidget);
+                i18n("Create backup…"),
+                parentWidget
+            );
             connect(createBackupAction, &QAction::triggered, this,
                 [this, virtualPath, parentWidget]() {
-                    createBackup(virtualPath, parentWidget);
+                    bool ok = false;
+                    const QString name = QInputDialog::getText(parentWidget,
+                        i18n("Create backup"), i18n("Backup name:"),
+                        QLineEdit::Normal, QString(), &ok);
+                    if (!ok || name.isEmpty()) {
+                        return;
+                    }
+                    CommandHandler().executeBackup(virtualPath, name);
                 });
-            result.append(createBackupAction);
+            actions.append(createBackupAction);
         }
     }
+            QAction* action = new QAction(
+                QIcon::fromTheme("backup"),
+                i18n("Create backup…"),
+                parentWidget
+            );
+            actions.append(action);
 
-    return result;
-}
-
-void ClericumFileItemAction::mountStore(const QString& mountPath,
-    QWidget* parentWidget) {
-    // 当前文件夹作为挂载点，弹出目录选择框以选择要挂载的 store。
-    const QString storePath = QFileDialog::getExistingDirectory(parentWidget,
-        i18n("Select store to mount into %1", mountPath), mountPath);
-    if (storePath.isEmpty()) {
-        return;
-    }
-    CommandHandler().executeLoad(storePath, mountPath);
-}
-
-void ClericumFileItemAction::createStore(const QString& parentDir,
-    QWidget* parentWidget) {
-    bool ok = false;
-    const QString name = QInputDialog::getText(parentWidget,
-        i18n("Create store"), i18n("Store name:"),
-        QLineEdit::Normal, QString(), &ok);
-    if (!ok || name.isEmpty()) {
-        return;
-    }
-    const QString storePath = QDir(parentDir).filePath(name);
-    CommandHandler().executeCreate(storePath);
-}
-
-void ClericumFileItemAction::unloadMount(const QString& mountPath,
-    QWidget* parentWidget) {
-    Q_UNUSED(parentWidget);
-    CommandHandler().executeUnload(mountPath);
-}
-
-void ClericumFileItemAction::createBackup(const QString& virtualPath,
-    QWidget* parentWidget) {
-    bool ok = false;
-    const QString name = QInputDialog::getText(parentWidget,
-        i18n("Create backup"), i18n("Backup name:"),
-        QLineEdit::Normal, QString(), &ok);
-    if (!ok || name.isEmpty()) {
-        return;
-    }
-    CommandHandler().executeBackup(virtualPath, name);
+    return actions;
 }
 
 #include "fileitemaction.moc"

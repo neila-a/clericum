@@ -12,6 +12,10 @@
                 "Name": "Neila",
                 "Email": "neilaspace@outlook.com"
             }
+        ],
+        "MimeTypes": [
+            "application/octet-stream",
+            "inode/directory"
         ]
     },
     "X-KDE-Show-In-Submenu": "true",
