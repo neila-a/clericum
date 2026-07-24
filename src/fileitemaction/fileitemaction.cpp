@@ -3,20 +3,11 @@
  * @brief ClericumFileItemAction 类实现
  */
 
- // 插件自身的翻译域，使用项目名（与 CLI / catalog 一致）。
- // 必须在包含任何 KDE i18n 头文件之前定义。
-#define TRANSLATION_DOMAIN _PROJECT_NAME
-
 #include "fileitemaction.h"
 
-#include <KLocalizedString>
 #include <KPluginFactory>
-
-#include <QDir>
 #include <QFileDialog>
-#include <QFileInfo>
 #include <QInputDialog>
-#include <QList>
 
 // 在引入 storemanager.h 之前已完成所有外部头文件包含，避免其全局日志宏
 // （log/critical/information/warn）污染后续头文件。

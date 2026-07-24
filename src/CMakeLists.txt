@@ -3,6 +3,7 @@ function(defineProjectInfo name)
         _PROJECT_NAME="${GLOBAL_PROJECT_NAME}"
         _PROJECT_VERSION="${GLOBAL_PROJECT_VERSION}"
         _PROJECT_HOMEPAGE="${GLOBAL_PROJECT_HOMEPAGE}"
+        TRANSLATION_DOMAIN="${GLOBAL_PROJECT_NAME}"
     )
 endfunction()
 function(complete name)
