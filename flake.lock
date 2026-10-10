@@ -1,5 +1,17 @@
 {
   "nodes": {
+    "bash-completor": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-pAy0JitlmZBMlr5pWF4tB4NheowD0cNuNFJIEYSMQ1Y=",
+        "type": "file",
+        "url": "https://proxy.gitwarp.top/https://github.com/adoyle-h/bash-completor/releases/download/v0.2.0/bash-completor"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://proxy.gitwarp.top/https://github.com/adoyle-h/bash-completor/releases/download/v0.2.0/bash-completor"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -34,6 +46,7 @@
     },
     "root": {
       "inputs": {
+        "bash-completor": "bash-completor",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       }
